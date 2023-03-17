@@ -148,7 +148,7 @@ class _RegisterWithPhoneNumberState extends State<RegisterWithPhoneNumber> {
                       },
                       color: Colors.white,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
+                          borderRadius: BorderRadius.circular(8)),
                       padding: const EdgeInsets.symmetric(
                           vertical: 15, horizontal: 30),
                       child: _isLoading
