@@ -29,12 +29,15 @@ class _OrderCardState extends State<OrderCard> {
                     width: 90,
                     child: Image.asset(widget.orderDetails.icon),
                   ),
-                  title: Text(
-                      widget.orderDetails.itemName,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20
-                      )
+                  title: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
+                    child: Text(
+                        widget.orderDetails.itemName,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20
+                        )
+                    ),
                   ),
                   subtitle: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

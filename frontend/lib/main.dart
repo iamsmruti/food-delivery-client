@@ -18,6 +18,6 @@ Future<void> main() async {
       primaryColor: primaryColor,
       scaffoldBackgroundColor: Colors.white
     ),
-    home: const CartScreen(),
+    home: const WelcomeScreen(),
   ));
 }
