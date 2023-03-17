@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:frontend/Screens/register_with_phone.dart';
 import 'package:frontend/constant.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -20,7 +20,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       width: size.width,
       color: primaryColor,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: width*0.15,vertical: height*0.12),
+        padding: EdgeInsets.symmetric(
+            horizontal: width * 0.15, vertical: height * 0.12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,47 +36,46 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     letterSpacing: 1.6,
                     fontWeight: FontWeight.bold,
                     fontSize: 60,
-                    color: Colors.white
-                ),
-                child: Text('Food for')
-            ),
+                    color: Colors.white),
+                child: Text('Food for')),
             const DefaultTextStyle(
                 style: TextStyle(
                     height: 0.8,
                     letterSpacing: 1.6,
                     fontWeight: FontWeight.bold,
                     fontSize: 60,
-                    color: Colors.white
-                ),
-                child: Text('Everyone')
-            ),
-            SizedBox(height: height*0.45),
+                    color: Colors.white),
+                child: Text('Everyone')),
+            SizedBox(height: height * 0.45),
             Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                      width: width*0.6,
-                      child:ClipRRect(
-                        borderRadius: BorderRadius.circular(29),
-                        child: TextButton(
-                            style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 13,horizontal: 35),
-                            backgroundColor: Colors.white
-                          ),
-                          onPressed: () {},
-                          child: const Text(
-                            'Login',
-                            style: TextStyle(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: width * 0.6,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(29),
+                    child: TextButton(
+                        style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 13, horizontal: 35),
+                            backgroundColor: Colors.white),
+                        onPressed: () {
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const RegisterWithPhoneNumber()));
+                        },
+                        child: const Text(
+                          'Login',
+                          style: TextStyle(
                               color: primaryColor,
                               fontSize: 20,
-                              fontWeight: FontWeight.bold
-                            ),
-                          )
-                        ),
-                    ),
+                              fontWeight: FontWeight.bold),
+                        )),
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
