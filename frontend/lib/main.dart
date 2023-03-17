@@ -17,6 +17,6 @@ Future<void> main() async {
       primaryColor: primaryColor,
       scaffoldBackgroundColor: Colors.white
     ),
-    home: const LoginScreen(),
+    home: const WelcomeScreen(),
   ));
 }
