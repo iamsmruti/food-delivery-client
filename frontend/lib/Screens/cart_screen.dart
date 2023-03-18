@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/Custom%20UI/OrderCard.dart';
+import 'package:frontend/Custom%20UI/order_card.dart';
 import 'package:frontend/constant.dart';
-import '../Models/OrderDetails.dart';
+import '../Models/order_details.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -24,7 +24,7 @@ class _CartScreenState extends State<CartScreen> {
       appBar: AppBar(
           centerTitle: true,
           elevation: 0,
-          backgroundColor: Colors.grey.shade200,
+          backgroundColor: Colors.grey.shade50,
           title: const Text(
             'Cart',
             style: TextStyle(
@@ -34,6 +34,7 @@ class _CartScreenState extends State<CartScreen> {
             ),
           ),
         ),
+
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: primaryColor,
         onPressed: ()  {},
@@ -43,7 +44,7 @@ class _CartScreenState extends State<CartScreen> {
               'Complete Order',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
+                fontSize: 20,
                 letterSpacing: 0.5
             ),
           ),
@@ -51,14 +52,11 @@ class _CartScreenState extends State<CartScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       backgroundColor: Colors.grey.shade200,
-      body: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.9,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 30),
-          child: ListView.builder(
-            itemCount: details.length,
-            itemBuilder: (context,index)=>OrderCard(orderDetails: details[index]),
-          ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30,vertical: 30),
+        child: ListView.builder(
+          itemCount: details.length,
+          itemBuilder: (context,index)=>OrderCard(orderDetails: details[index]),
         ),
       ),
     );
