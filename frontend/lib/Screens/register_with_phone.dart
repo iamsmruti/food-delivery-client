@@ -153,8 +153,8 @@ class _RegisterWithPhoneNumberState extends State<RegisterWithPhoneNumber> {
                           vertical: 15, horizontal: 30),
                       child: _isLoading
                           ? const SizedBox(
-                              width: 20,
-                              height: 20,
+                              width: 16,
+                              height: 16,
                               child: CircularProgressIndicator(
                                 backgroundColor: Colors.blue,
                                 color: Colors.black,

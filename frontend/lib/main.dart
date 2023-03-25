@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/Screens/cart_screen.dart';
 import 'package:frontend/Screens/welcome_screen.dart';
 import 'package:frontend/constant.dart';
@@ -11,12 +12,14 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      primaryColor: primaryColor,
-      scaffoldBackgroundColor: Colors.white
+  runApp(ProviderScope(
+    child: MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: primaryColor,
+        scaffoldBackgroundColor: Colors.white
+      ),
+      home: const WelcomeScreen()
     ),
-    home: const WelcomeScreen()
   ));
 }

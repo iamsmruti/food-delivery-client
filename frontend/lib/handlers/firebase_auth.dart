@@ -1,12 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:frontend/Screens/otp_screen.dart';
 
 class FirebsePhoneAuth {
   FirebaseAuth auth = FirebaseAuth.instance;
   int? forceResendToken;
-  verifyphone(String phoneNum, BuildContext context) async {
-    await auth.verifyPhoneNumber(
+  Future verifyphone(String phoneNum, BuildContext context) async {
+    try {
+      await auth.verifyPhoneNumber(
       phoneNumber: phoneNum,
       verificationCompleted: (PhoneAuthCredential credential) async {
         await auth.signInWithCredential(credential).then((value) {
@@ -24,16 +27,21 @@ class FirebsePhoneAuth {
       },
       codeSent: (String verificationId, int? resendToken) {
         forceResendToken = resendToken;
-        // Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //         builder: (context) => Verification(
-        //               phoneNumber: phoneNum,
-        //               verificationId: verificationId,
-        //             )));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => OtpScreen(
+                      phoneNumber: phoneNum,
+                      verificationId: verificationId,
+                    )));
       },
       forceResendingToken: forceResendToken,
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
+    } on FirebaseAuthException catch (e) {
+
+      Fluttertoast.showToast(msg: e.toString());
+      
+    }
   }
 }

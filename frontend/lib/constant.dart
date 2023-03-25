@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 const primaryColor = Color.fromARGB(200, 31, 117, 254);
 const secondaryColor = Colors.white;
+const tertiaryColor = Color(0xff90e0ef);
 
 const subtitleText14 = TextStyle(fontSize: 14, color: Colors.white);
 const subtitleText16 = TextStyle(fontSize: 16, color: Colors.white);
