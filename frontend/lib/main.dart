@@ -1,9 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/EmptyScreens/offer_screen.dart';
+import 'package:frontend/Screens/welcome_screen.dart';
 import 'package:frontend/constant.dart';
-import 'EmptyScreens/orders_screen.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -18,7 +17,7 @@ Future<void> main() async {
         primaryColor: primaryColor,
         scaffoldBackgroundColor: Colors.white
       ),
-      home: const OfferScreen()
+      home: const WelcomeScreen()
     ),
   ));
 }
