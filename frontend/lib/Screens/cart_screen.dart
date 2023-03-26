@@ -35,17 +35,21 @@ class _CartScreenState extends State<CartScreen> {
           ),
         ),
 
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: primaryColor,
-        onPressed: ()  {},
-        label: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-              'Complete Order',
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                letterSpacing: 0.5
+      floatingActionButton: SizedBox(
+        height: 70,
+        width: 200,
+        child: FloatingActionButton.extended(
+          backgroundColor: primaryColor,
+          onPressed: ()  {},
+          label: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+                'Complete Order',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  letterSpacing: 0.5
+              ),
             ),
           ),
         ),

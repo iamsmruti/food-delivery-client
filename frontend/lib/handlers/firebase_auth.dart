@@ -15,7 +15,7 @@ class FirebsePhoneAuth {
         await auth.signInWithCredential(credential).then((value) {
           if (value.user != null) {
             if (kDebugMode) {
-              print("User Signed In SucessFully");
+              print("User Signed In Successfully");
             }
           }
         });
