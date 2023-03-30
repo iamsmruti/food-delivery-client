@@ -41,6 +41,8 @@ dependencies:
   animate_do: ^3.0.2
   intl_phone_number_input: ^0.7.2
   firebase_auth: ^4.3.0
+  pinput: ^2.2.31
+  flutter_riverpod: ^2.3.2
 
 dev_dependencies:
   flutter_test:
