@@ -43,6 +43,8 @@ dependencies:
   firebase_auth: ^4.3.0
   pinput: ^2.2.31
   flutter_riverpod: ^2.3.2
+  cloud_firestore: ^4.5.3
+  persistent_bottom_nav_bar: ^5.0.2
 
 dev_dependencies:
   flutter_test:

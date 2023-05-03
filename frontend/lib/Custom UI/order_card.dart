@@ -3,7 +3,7 @@ import 'package:frontend/Models/order_details.dart';
 import 'package:frontend/constant.dart';
 
 class OrderCard extends StatefulWidget {
-  const OrderCard({Key? key,required this.orderDetails}) : super(key: key);
+  const OrderCard({Key? key, required this.orderDetails}) : super(key: key);
   final OrderDetails orderDetails;
 
   @override
@@ -13,7 +13,6 @@ class OrderCard extends StatefulWidget {
 class _OrderCardState extends State<OrderCard> {
   @override
   Widget build(BuildContext context) {
-    int count = 1;
     return Column(
       children: [
         Center(
@@ -23,100 +22,82 @@ class _OrderCardState extends State<OrderCard> {
               shape: roundedRectangle8,
               color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: ListTile(
-                    leading: SizedBox(
-                      height: 90,
-                      width: 90,
-                      child: Image.asset(widget.orderDetails.icon),
-                    ),
-                    title: Padding(
-                      padding: const EdgeInsets.fromLTRB(6, 0, 0, 6),
-                      child: Text(
-
-                          widget.orderDetails.itemName,
-                          maxLines: 2,
-
+                  leading: Image.network(
+                    "https://images.livemint.com/img/2023/01/13/600x338/Kolkata_Biryani_1673628587318_1673628598499_1673628598499.jpg",
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 0, 0, 12),
+                    child: Text(widget.orderDetails.itemName,
+                        maxLines: 2,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 0, 0, 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          widget.orderDetails.orderNumber,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 20
-                          )
-                      ),
-                    ),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.fromLTRB(6, 0, 0, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                              widget.orderDetails.orderNumber,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: primaryColor
-                              ),
-                          ),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(90),
-                            child: Container(
+                              fontSize: 16,
+                              color: primaryColor),
+                        ),
+                        Row(
+                          children: [
+                            Card(
+                              margin: const EdgeInsets.only(right: 0),
+                              shape: roundedRectangle4,
                               color: primaryColor,
-                              child: Row(
-                                children: [
-                                  InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          count++;
-                                        });
-                                      },
-                                      child: const Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 8),
-                                        child: Text(
-                                            '+',
-                                          style: TextStyle(
-                                            fontSize: 25,
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                      )
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                                    child: Text(
-                                      count.toString(),
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold
-                                      ),
-                                    ),
-                                  ),
-                                  InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          count--;
-                                        });
-                                      },
-                                      child: const Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 8),
-                                        child: Text(
-                                            '-',style: TextStyle(
-                                            fontSize: 27,
-                                          fontWeight: FontWeight.bold
-                                        ),
-                                        ),
-                                      )
-                                  ),
-                                ],
+                              child: InkWell(
+                                splashColor: Colors.white70,
+                                customBorder: roundedRectangle4,
+                                child: const Icon(
+                                  Icons.remove,
+                                  size: 22,
+                                  color: secondaryColor,
+                                ),
                               ),
                             ),
-                          )
-                        ],
-                      ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8.0, vertical: 2),
+                              child: Text(
+                                "2",
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black),
+                              ),
+                            ),
+                            Card(
+                              margin: const EdgeInsets.only(right: 0),
+                              shape: roundedRectangle4,
+                              color: primaryColor,
+                              child: InkWell(
+                                splashColor: Colors.white70,
+                                customBorder: roundedRectangle4,
+                                child: const Icon(
+                                  Icons.add,
+                                  size: 22,
+                                  color: secondaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
+                ),
               ),
             ),
           ),
-          ),
+        ),
         const SizedBox(height: 15)
       ],
     );
