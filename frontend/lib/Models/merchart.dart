@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,15 +13,16 @@ class Merchant extends ChangeNotifier {
   String? notificationToken;
   String? photoUrl;
   String? phoneNumber;
-  Merchant({
-    this.name,
-    this.latitude,
-    this.longitude,
-    this.placeId,
-    this.notificationToken,
-    this.photoUrl,
-    this.phoneNumber,
-  });
+  String? description;
+  Merchant(
+      {this.name,
+      this.latitude,
+      this.longitude,
+      this.placeId,
+      this.notificationToken,
+      this.photoUrl,
+      this.phoneNumber,
+      this.description});
 
   changeMerchant(Merchant merchant) {
     name = merchant.name;
@@ -32,7 +32,7 @@ class Merchant extends ChangeNotifier {
     notificationToken = merchant.notificationToken;
     photoUrl = merchant.photoUrl;
     phoneNumber = merchant.phoneNumber;
-
+    description = merchant.description;
     notifyListeners();
   }
 }

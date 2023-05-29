@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/Screens/cart_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/Models/cart_model.dart';
 import 'package:frontend/constant.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
-class RestaurantInfo extends StatelessWidget {
+import '../Screens/cart_screen.dart';
+
+class RestaurantInfo extends ConsumerWidget {
   const RestaurantInfo({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
         margin: const EdgeInsets.only(top: 40),
         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -20,10 +23,25 @@ class RestaurantInfo extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Black Box",
-                      style:
-                          TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        IconButton(
+                            padding: const EdgeInsets.only(top: 5),
+                            constraints: const BoxConstraints(),
+                            onPressed: () {},
+                            icon: const Icon(
+                              Icons.arrow_back_ios,
+                            )),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        const Text(
+                          "Black Box",
+                          style: TextStyle(
+                              fontSize: 28, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                     const SizedBox(
                       height: 10,
@@ -82,17 +100,17 @@ class RestaurantInfo extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: Row(
-                      children: const [
-                        Icon(
+                      children: [
+                        const Icon(
                           Icons.shopping_cart,
                           color: Colors.amber,
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 3,
                         ),
                         Text(
-                          "10",
-                          style: TextStyle(
+                          ref.watch(cartDataProv).cartItems.length.toString(),
+                          style: const TextStyle(
                               color: secondaryColor,
                               fontWeight: FontWeight.bold),
                         )

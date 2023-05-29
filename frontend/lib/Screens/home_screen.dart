@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(
               height: 10,
             ),
-            buildFoodFilter(),
+            buildSearchBar(),
             const SizedBox(
               height: 10,
             ),
@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       image:
                           "https://images.theconversation.com/files/368263/original/file-20201109-22-lqiq5c.jpg?ixlib=rb-1.1.0&rect=10%2C0%2C6699%2C4476&q=45&auto=format&w=926&fit=clip",
                       price: 200,
-                      name: "How",
+                      name: "How $index",
                       description: "Now",
                       id: "105",
                       category: "Dinner",
@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildFoodFilter() {
+  Widget buildSearchBar() {
     return InkWell(
       onTap: (() {
         // showSearch(
@@ -85,11 +85,11 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Card(
               shape: roundedRectangle12,
               color: secondaryColor,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: const [
+                  children: [
                     Icon(Icons.search),
                     SizedBox(
                       width: 10,
@@ -114,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
               image:
                   "https://images.livemint.com/img/2023/01/13/600x338/Kolkata_Biryani_1673628587318_1673628598499_1673628598499.jpg",
               price: 200,
-              name: "How",
+              name: "How $index",
               description: "Now",
               id: "105",
               category: "Dinner",

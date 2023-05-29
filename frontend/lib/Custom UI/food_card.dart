@@ -177,6 +177,7 @@ class FoodCardState extends ConsumerState<FoodCard>
                         child: const Icon(
                           Icons.remove,
                           size: 20,
+                          color: secondaryColor,
                         ),
                       ),
                     ),
@@ -196,6 +197,7 @@ class FoodCardState extends ConsumerState<FoodCard>
                         child: const Icon(
                           Icons.add,
                           size: 20,
+                          color: secondaryColor,
                         ),
                       ),
                     ),
@@ -223,12 +225,4 @@ class FoodCardState extends ConsumerState<FoodCard>
     ref.read(cartDataProv).removeItem(CartItem(food: food, quantity: 0));
     setState(() {});
   }
-
-  // showCart() {
-  //   showModalBottomSheet(
-  //     shape: roundedRectangle40,
-  //     context: context,
-  //     builder: (context) => const CartBottomSheet(),
-  //   );
-  // }
 }

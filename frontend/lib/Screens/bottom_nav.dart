@@ -51,6 +51,7 @@ class BottomNav extends StatelessWidget {
         activeColorPrimary: primaryColor,
         inactiveColorPrimary: Colors.black,
       ),
+      
     ];
     List<Widget> screens = const [
       Scaffold(
@@ -76,14 +77,14 @@ class BottomNav extends StatelessWidget {
       navBarHeight: 60,
       navBarStyle: NavBarStyle.style1,
       confineInSafeArea: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       handleAndroidBackButtonPress: true,
       resizeToAvoidBottomInset: true,
       stateManagement: true,
       hideNavigationBarWhenKeyboardShows: true,
       decoration: NavBarDecoration(
         borderRadius: BorderRadius.circular(6),
-        colorBehindNavBar: Colors.transparent,
+        colorBehindNavBar: Colors.white,
       ),
       itemAnimationProperties: const ItemAnimationProperties(
         // Navigation Bar's items animation properties.

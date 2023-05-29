@@ -7,8 +7,8 @@ const tertiaryColor = Color(0xff90e0ef);
 const subtitleText14 = TextStyle(fontSize: 14, color: Colors.white);
 const subtitleText16 = TextStyle(fontSize: 16, color: Colors.white);
 //Style
-const headerStyle = TextStyle(
-    fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xffe5de00));
+const headerStyle =
+    TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black);
 const titleStyle =
     TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black);
 const titleStyle2 = TextStyle(
