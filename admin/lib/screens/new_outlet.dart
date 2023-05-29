@@ -1,7 +1,6 @@
 import 'package:admin/constants.dart';
 import 'package:admin/handlers/google_maps.dart';
 import 'package:admin/models/place_search.dart';
-import 'package:admin/screens/outlet_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -27,7 +26,7 @@ class _NewOutletState extends State<NewOutlet> {
   double? latitude;
   double? longitude;
 
-  void submitData() async {
+  submitData() async {
     if (name == '') {
       Fluttertoast.showToast(msg: 'Name can\'t be empty');
     } else if (description == '') {
@@ -35,19 +34,22 @@ class _NewOutletState extends State<NewOutlet> {
     } else if (searchQueryController.text == '') {
       Fluttertoast.showToast(msg: 'Location can\'t be empty');
     } else {
-      FirebaseFirestore.instance.collection("Merchants").doc(FirebaseAuth.instance.currentUser!.uid).set({
+      FirebaseFirestore.instance
+          .collection("Merchants")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .set({
         "name": name,
         "description": description,
         "lat": latitude,
         "lng": longitude,
-        "notif_token": FirebaseMessaging.instance.getToken()
+        "notif_token": await FirebaseMessaging.instance.getToken()
       }).whenComplete(() {
         Fluttertoast.showToast(msg: "Outlet Created Successfully");
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const OutletScreen()),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => const OutletScreen()),
+        // );
       }).onError((error, _) {
         Fluttertoast.showToast(msg: "$error");
       });
@@ -196,8 +198,8 @@ class _NewOutletState extends State<NewOutlet> {
                     borderRadius: BorderRadius.circular(8)),
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-                onPressed: () {
-                  submitData();
+                onPressed: () async {
+                  await submitData();
                 },
                 child: isLoading
                     ? const SizedBox(

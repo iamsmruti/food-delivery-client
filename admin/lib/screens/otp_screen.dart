@@ -1,5 +1,5 @@
 import 'package:admin/constants.dart';
-import 'package:admin/screens/outlet_screen.dart';
+import 'package:admin/screens/new_outlet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -93,7 +93,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                       PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: widget.verificationId, smsCode: _verificationCode!);
                       await FirebaseAuth.instance.signInWithCredential(credential).then((value) {
                         if(value.user != null){
-                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const OutletScreen()), (route) => false);
+                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const NewOutlet()), (route) => false);
                         }
                       });
                     } on FirebaseAuthException catch (e) {
