@@ -1,3 +1,4 @@
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,7 +61,7 @@ class _ItemAddState extends State<ItemAdd> {
       _itemImageController.text = widget.imageLink!;
       _itemDescriptionController.text = widget.description!;
     } else {
-      generateItemId();
+      // generateItemId();
     }
     getcategories();
   }
@@ -393,17 +394,17 @@ class _ItemAddState extends State<ItemAdd> {
     setState(() {});
   }
 
-  generateItemId() async {
-    await FirebaseFirestore.instance
-        .collection("Items")
-        .get()
-        .then((value) => itemIdList = value.docs.map((e) => e.id).toList());
-    // if (itemIdList!.isEmpty) {
-    //   itemIdList!.add("99");
-    // }
-    _itemIdController.text =
-        (int.parse(itemIdList?[itemIdList!.length - 1]) + 1).toString();
-  }
+  // generateItemId() async {
+  //   await FirebaseFirestore.instance
+  //       .collection("Merchants").doc(FirebaseAuth.instance.currentUser?.uid).collection("Items")
+  //       .get()
+  //       .then((value) => itemIdList = value.docs.map((e) => e.id).toList());
+  //   // if (itemIdList!.isEmpty) {
+  //   //   itemIdList!.add("99");
+  //   // }
+  //   _itemIdController.text =
+  //       (int.parse(itemIdList?[itemIdList!.length - 1]) + 1).toString();
+  // }
 
   Future addItem() async {
     bool checkItemId = await FirebaseFirestore.instance
@@ -460,7 +461,7 @@ class _ItemAddState extends State<ItemAdd> {
                   _itemImageController.clear();
                   _itemNameController.clear();
                   _itemPriceController.clear();
-                  await generateItemId();
+                  // await generateItemId();
                   setState(() {});
                 }));
       }
