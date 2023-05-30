@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -47,6 +48,8 @@ class _ItemAddState extends State<ItemAdd> {
   final _itemDescriptionController = TextEditingController();
 
   final _newCategoryController = TextEditingController();
+
+  List<String> categorylist = ["Indian", "Chinese"];
 
   @override
   void initState() {
@@ -217,7 +220,7 @@ class _ItemAddState extends State<ItemAdd> {
                               color: Colors.black54,
                             ),
                           ),
-                          items: items!
+                          items: categorylist
                               .map((item) => DropdownMenuItem<String>(
                                     value: item,
                                     child: Text(
@@ -395,7 +398,9 @@ class _ItemAddState extends State<ItemAdd> {
 
   generateItemId() async {
     await FirebaseFirestore.instance
-        .collection("Items")
+        .collection("Merchants")
+        .doc("FirebaseAuth.instance.currentUser!.uid")
+        .collection("Menu")
         .get()
         .then((value) => itemIdList = value.docs.map((e) => e.id).toList());
     // if (itemIdList!.isEmpty) {
@@ -406,15 +411,17 @@ class _ItemAddState extends State<ItemAdd> {
   }
 
   Future addItem() async {
-    bool checkItemId = await FirebaseFirestore.instance
-        .collection("Items")
-        .doc(_itemIdController.text)
-        .get()
-        .then((value) => value.exists);
-    if (widget.isEdit) {
-      checkItemId = false;
-    }
-    if (checkItemId) {
+    // bool checkItemId = await FirebaseFirestore.instance
+    //     .collection("Merchants")
+    //     .doc(FirebaseAuth.instance.currentUser!.uid)
+    //     .collection("Menu")
+    //     .doc(_itemIdController.text)
+    //     .get()
+    //     .then((value) => value.exists);
+    // if (widget.isEdit) {
+    //   checkItemId = false;
+    // }
+    if (false) {
       Fluttertoast.showToast(
           msg: "Item Id already Exits",
           toastLength: Toast.LENGTH_SHORT,
@@ -434,8 +441,11 @@ class _ItemAddState extends State<ItemAdd> {
             textColor: Colors.white,
             fontSize: 16.0);
       } else {
+        print("Xyz");
         await FirebaseFirestore.instance
-            .collection("Items")
+            .collection("Merchants")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection("Menu")
             .doc(_itemIdController.text)
             .set({
           "id": _itemIdController.text,
@@ -460,7 +470,7 @@ class _ItemAddState extends State<ItemAdd> {
                   _itemImageController.clear();
                   _itemNameController.clear();
                   _itemPriceController.clear();
-                  await generateItemId();
+                  //await generateItemId();
                   setState(() {});
                 }));
       }
@@ -489,10 +499,11 @@ class _ItemAddState extends State<ItemAdd> {
               ElevatedButton(
                 child: const Text('OK'),
                 onPressed: () async {
-                  await FirebaseFirestore.instance
-                      .collection("Catagories")
-                      .doc(_newCategoryController.text)
-                      .set({});
+                  await FirebaseFirestore.instance.collection("Catagories")
+                    ..doc(FirebaseAuth.instance.currentUser!.uid)
+                        .collection("Menu")
+                        .doc(_itemIdController.text)
+                        .set({});
                   setState(() {
                     getcategories();
                     Navigator.pop(context);
