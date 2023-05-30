@@ -9,7 +9,7 @@ class Food {
     required this.id,
     required this.category,
     required this.isVeg,
-    required this.isAvilable, 
+    required this.isAvilable,
   });
 
   final String image;
@@ -29,8 +29,8 @@ class Food {
       id: json["id"],
       category: json["category"],
       isVeg: json["veg"],
-      isAvilable:  json["isAvilable"]);
-  
+      isAvilable: json["isAvilable"]);
+
   static List<Food> foodList(QuerySnapshot json) {
     var data = json.docs
         .map(
@@ -46,7 +46,8 @@ class Food {
           price: vals["price"],
           description: vals["description"],
           category: vals["category"],
-          isVeg: vals["veg"], isAvilable: vals["isAvailable"]));
+          isVeg: vals["veg"],
+          isAvilable: vals["isAvailable"] ?? false));
     }
     return list;
   }

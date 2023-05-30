@@ -1,6 +1,7 @@
 import 'package:admin/constants.dart';
 import 'package:admin/handlers/google_maps.dart';
 import 'package:admin/models/place_search.dart';
+import 'package:admin/screens/outlet_mainpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -46,10 +47,10 @@ class _NewOutletState extends State<NewOutlet> {
       }).whenComplete(() {
         Fluttertoast.showToast(msg: "Outlet Created Successfully");
 
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const OutletScreen()),
-        // );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const OutletMainPage()),
+        );
       }).onError((error, _) {
         Fluttertoast.showToast(msg: "$error");
       });

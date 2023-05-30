@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Card(
               shape: roundedRectangle12,
               color: secondaryColor,
-              child: const Padding(
+              child:  Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,

@@ -1,5 +1,6 @@
 import 'package:admin/constants.dart';
 import 'package:admin/screens/new_outlet.dart';
+import 'package:admin/screens/outlet_mainpage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -23,14 +24,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   String? _verificationCode;
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: primaryColor,
       body: SingleChildScrollView(
         child: SafeArea(
-          child:Padding(
-            padding: const EdgeInsets.symmetric(
-                vertical: 115.0, horizontal: 24.0),
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 115.0, horizontal: 24.0),
             child: Column(
               children: [
                 SvgPicture.asset(
@@ -42,7 +42,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 const Text(
                   "Verify Yourself",
                   style: TextStyle(
-                      fontSize: 24, fontWeight: FontWeight.bold, color: secondaryColor),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: secondaryColor),
                 ),
                 const SizedBox(
                   height: 10,
@@ -64,8 +66,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                       height: 60,
                       decoration: BoxDecoration(
                         color: secondaryColor,
-                        borderRadius: const BorderRadius.all(
-                            Radius.circular(10)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
                         border: Border.all(
                           color: Colors.black,
                         ),
@@ -84,16 +86,25 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   minWidth: double.infinity,
                   color: secondaryColor,
                   shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 15, horizontal: 30),
+                      borderRadius: BorderRadius.circular(8)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
                   onPressed: () async {
                     ref.read(isLoading.notifier).state = true;
                     try {
-                      PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: widget.verificationId, smsCode: _verificationCode!);
-                      await FirebaseAuth.instance.signInWithCredential(credential).then((value) {
-                        if(value.user != null){
-                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const NewOutlet()), (route) => false);
+                      PhoneAuthCredential credential =
+                          PhoneAuthProvider.credential(
+                              verificationId: widget.verificationId,
+                              smsCode: _verificationCode!);
+                      await FirebaseAuth.instance
+                          .signInWithCredential(credential)
+                          .then((value) {
+                        if (value.user != null) {
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const OutletMainPage()),
+                              (route) => false);
                         }
                       });
                     } on FirebaseAuthException catch (e) {
@@ -101,15 +112,20 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                       Fluttertoast.showToast(msg: e.toString());
                     }
                   },
-                  child: ref.watch(isLoading) ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                backgroundColor: Colors.blue,
-                                color: Colors.black,
-                                strokeWidth: 2,
-                              ),
-                            ) : const Text("Submit",style: TextStyle(color: primaryColor),),
+                  child: ref.watch(isLoading)
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            backgroundColor: Colors.blue,
+                            color: Colors.black,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          "Submit",
+                          style: TextStyle(color: primaryColor),
+                        ),
                 ),
                 const SizedBox(height: 20),
                 const Text(
