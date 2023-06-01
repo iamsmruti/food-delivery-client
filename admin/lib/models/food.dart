@@ -9,7 +9,7 @@ class Food {
     required this.id,
     required this.category,
     required this.isVeg,
-    required this.isAvilable,
+    required this.isAvailable,
   });
 
   final String image;
@@ -19,7 +19,7 @@ class Food {
   final String id;
   final String category;
   final bool isVeg;
-  final bool isAvilable;
+  late final bool isAvailable;
 
   factory Food.fromJson(Map<String, dynamic> json) => Food(
       image: json["image"],
@@ -29,7 +29,7 @@ class Food {
       id: json["id"],
       category: json["category"],
       isVeg: json["veg"],
-      isAvilable: json["isAvilable"]);
+      isAvailable: json["isAvailable"]);
 
   static List<Food> foodList(QuerySnapshot json) {
     var data = json.docs
@@ -47,7 +47,7 @@ class Food {
           description: vals["description"],
           category: vals["category"],
           isVeg: vals["veg"],
-          isAvilable: vals["isAvailable"] ?? false));
+          isAvailable: vals["isAvailable"] ?? false));
     }
     return list;
   }

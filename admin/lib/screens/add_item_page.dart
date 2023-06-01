@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class ItemAdd extends StatefulWidget {
   const ItemAdd(
@@ -14,6 +18,7 @@ class ItemAdd extends StatefulWidget {
       this.itemPrice,
       this.description,
       this.isVeg,
+      this.isAvailable,
       this.imageLink,
       this.itemId,
       this.category});
@@ -22,6 +27,7 @@ class ItemAdd extends StatefulWidget {
   final String? itemName;
   final int? itemPrice;
   final bool? isVeg;
+  final bool? isAvailable;
   final String? category;
   final String? imageLink;
   final String? description;
@@ -38,6 +44,7 @@ class _ItemAddState extends State<ItemAdd> {
   String? itemName;
   int? itemPrice;
   bool isVeg = true;
+  bool isAvailable = true;
   String imageLink =
       "https://images.everydayhealth.com/images/diet-nutrition/34da4c4e-82c3-47d7-953d-121945eada1e00-giveitup-unhealthyfood.jpg?sfvrsn=a31d8d32_0";
   String? description;
@@ -60,6 +67,7 @@ class _ItemAddState extends State<ItemAdd> {
       _itemPriceController.text = widget.itemPrice!.toString();
       selectedValue = widget.category;
       isVeg = widget.isVeg!;
+      isAvailable = widget.isAvailable!;
       _itemImageController.text = widget.imageLink!;
       _itemDescriptionController.text = widget.description!;
     } else {
@@ -310,6 +318,64 @@ class _ItemAddState extends State<ItemAdd> {
                           borderRadius: BorderRadius.all(Radius.circular(20))),
                       padding: const EdgeInsets.all(12.0),
                       child: const Icon(
+                        CupertinoIcons.money_rubl_circle,
+                        color: Colors.white,
+                        size: 16.0,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    ChoiceChip(
+                      label: Text(
+                        "Available",
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: isAvailable ? Colors.white : Colors.black),
+                      ),
+                      selected: isAvailable ? true : false,
+                      selectedColor: Colors.green,
+                      onSelected: (val) {
+                        if (val) {
+                          setState(() {
+                            isAvailable = true;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    ChoiceChip(
+                      label: Text(
+                        "Unavailable",
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: !isAvailable ? Colors.white : Colors.black),
+                      ),
+                      selected: !isAvailable ? true : false,
+                      selectedColor: Colors.red,
+                      onSelected: (val) {
+                        if (val) {
+                          setState(() {
+                            isAvailable = false;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                          color: Colors.amber,
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                      padding: const EdgeInsets.all(12.0),
+                      child: const Icon(
                         CupertinoIcons.money_dollar_circle,
                         color: Colors.white,
                         size: 16.0,
@@ -320,17 +386,22 @@ class _ItemAddState extends State<ItemAdd> {
                     ),
                     Expanded(
                       child: TextField(
+                        readOnly: true,
+                        onTap: () {
+                          selectImage();
+                        },
                         controller: _itemImageController,
                         decoration: const InputDecoration(
-                            hintText: "Select Image",
-                            hintStyle: TextStyle(color: Colors.black54)),
+                          hintText: "Select Image",
+                          hintStyle: TextStyle(color: Colors.black54),
+                        ),
                         style:
                             const TextStyle(fontSize: 16, color: Colors.black),
                         onChanged: (value) {
                           try {} catch (e) {}
                         },
                       ),
-                    )
+                    ),
                   ],
                 ),
                 const SizedBox(
@@ -453,6 +524,7 @@ class _ItemAddState extends State<ItemAdd> {
           "name": _itemNameController.text,
           "category": selectedValue,
           "veg": isVeg,
+          "isAvailable": isAvailable,
           "price": int.parse(_itemPriceController.text)
         }).whenComplete(() => Fluttertoast.showToast(
                         msg: "Item Added",
@@ -510,5 +582,31 @@ class _ItemAddState extends State<ItemAdd> {
             ],
           );
         });
+  }
+
+  void selectImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      // Handle the selected image here
+      // You can upload the image to Firestore using Firebase Storage
+      // and store the download URL in the Firestore document
+      // For example:
+      // 1. Upload the image to Firebase Storage and get the download URL
+      // 2. Save the download URL to Firestore
+      // 3. Update the image link in the _itemImageController
+      String imageLink = await uploadImageToFirestore(image.path);
+      _itemImageController.text = imageLink;
+    }
+  }
+
+  Future<String> uploadImageToFirestore(String imagePath) async {
+    String fileName = imagePath.split('/').last;
+    firebase_storage.Reference ref =
+        firebase_storage.FirebaseStorage.instance.ref().child(fileName);
+    firebase_storage.UploadTask uploadTask = ref.putFile(File(imagePath));
+    firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadURL = await taskSnapshot.ref.getDownloadURL();
+    return downloadURL;
   }
 }

@@ -18,7 +18,7 @@ class _OutletMainPageState extends State<OutletMainPage> {
   var _selectedIndex = 0;
   late PersistentTabController _controller;
   List pages = [
-    outlet(),
+    Outlet(),
     ItemAdd(isEdit: false),
     Container(child: Center(child: Text("Next page"))),
   ];
@@ -37,7 +37,7 @@ class _OutletMainPageState extends State<OutletMainPage> {
 
   List<Widget> _buildScreens() {
     return [
-      outlet(),
+      Outlet(),
       ItemAdd(isEdit: false),
       Container(child: Center(child: Text("Next page"))),
     ];
