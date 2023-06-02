@@ -8,7 +8,7 @@ class GoogleMapsHandler {
   String API_KEY = 'AIzaSyDzZIfF8tcz2poemY8_6DCEd19t2FhtlV4';
   Future getAutocomplete(searchQuery) async {
     var url =
-        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$searchQuery&language=en&types=geocode&key=$API_KEY&types=sublocality';
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$searchQuery&language=en&types=geocode&key=$API_KEY&types=sublocality&components=country:IN';
 
     var response = await http.get(Uri.parse(url));
     return placeSearchFromJson(response.body);

@@ -52,6 +52,7 @@ dependencies:
   persistent_bottom_nav_bar: ^5.0.2
   loading_animation_widget: ^1.2.0+4
   get: ^4.6.5
+  url_launcher: ^6.1.11
 
 dev_dependencies:
   flutter_test:
