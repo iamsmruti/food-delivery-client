@@ -40,7 +40,7 @@ class _OutletState extends State<Outlet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Row(
+               Row(
                 children: [
                   Icon(
                     Icons.arrow_back_ios,
@@ -68,7 +68,7 @@ class _OutletState extends State<Outlet> {
                         print(snapshot.data?.length);
                       }
                       if (snapshot.hasError) {
-                        return const Text("Something went wrong");
+                        return Text("Error: ${snapshot.error.toString()}");
                       } else if (snapshot.hasData) {
                         if (kDebugMode) {
                           // print(snapshot.data?.length);
@@ -189,6 +189,7 @@ class _OutletState extends State<Outlet> {
 
             Column(
               children: [
+                Text("Availablity",style: TextStyle(fontSize: 12,color: Colors.black,fontWeight:FontWeight.w400),),
                 Switch(
                   value: food.isAvailable,
                   onChanged: (value) async {

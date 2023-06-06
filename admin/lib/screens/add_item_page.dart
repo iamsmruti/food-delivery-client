@@ -56,7 +56,7 @@ class _ItemAddState extends State<ItemAdd> {
 
   final _newCategoryController = TextEditingController();
 
-  List<String> categorylist = ["Indian", "Chinese"];
+
 
   @override
   void initState() {
@@ -228,7 +228,7 @@ class _ItemAddState extends State<ItemAdd> {
                               color: Colors.black54,
                             ),
                           ),
-                          items: categorylist
+                          items: items!
                               .map((item) => DropdownMenuItem<String>(
                                     value: item,
                                     child: Text(
@@ -568,11 +568,8 @@ class _ItemAddState extends State<ItemAdd> {
               ElevatedButton(
                 child: const Text('OK'),
                 onPressed: () async {
-                  FirebaseFirestore.instance.collection("Catagories")
-                    ..doc(FirebaseAuth.instance.currentUser!.uid)
-                        .collection("Menu")
-                        .doc(_itemIdController.text)
-                        .set({});
+                  FirebaseFirestore.instance.collection("Categories")
+                    .doc(_newCategoryController.text).set({});
                   setState(() {
                     getcategories();
                     Navigator.pop(context);
