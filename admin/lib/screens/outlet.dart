@@ -30,65 +30,55 @@ class _OutletState extends State<Outlet> {
         return Food.foodList(snapshot);
       });
 
+  Future<List<String>> getCategories() async => await FirebaseFirestore.instance
+      .collection("Merchants")
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .collection("Categories")
+      .get()
+      .then((value) => value.docs.map((e) => e.id).toList());
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 186, 228, 228),
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          title: const Text(
+            "Menu",
+            style: TextStyle(
+                fontSize: 25, fontWeight: FontWeight.bold, color: Colors.black),
+          ),
+          centerTitle: true,
+        ),
         body: Container(
           padding: const EdgeInsets.all(10),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-               Row(
-                children: [
-                  Icon(
-                    Icons.arrow_back_ios,
-                    size: 25,
-                    color: Colors.black,
-                  ),
-                  SizedBox(
-                    width: 50 * 2,
-                  ),
-                  Text(
-                    "Menu",
-                    style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                  )
-                ],
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: StreamBuilder<List<Food>>(
-                    stream: readFoodDetails(),
-                    builder: (context, snapshot) {
-                      if (kDebugMode) {
-                        print(snapshot.data?.length);
-                      }
-                      if (snapshot.hasError) {
-                        return Text("Error: ${snapshot.error.toString()}");
-                      } else if (snapshot.hasData) {
-                        if (kDebugMode) {
-                          // print(snapshot.data?.length);
-                        }
-                        final foods = snapshot.data!;
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: foods.length,
-                          itemBuilder: (context, index) =>
-                              buildFood(foods[index]),
-                        );
-                      } else {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                    },
-                  ),
-                ),
-              ),
-            ],
+          child: SingleChildScrollView(
+            child: StreamBuilder<List<Food>>(
+              stream: readFoodDetails(),
+              builder: (context, snapshot) {
+                if (kDebugMode) {
+                  print(snapshot.data?.length);
+                }
+                if (snapshot.hasError) {
+                  return Text("Error: ${snapshot.error.toString()}");
+                } else if (snapshot.hasData) {
+                  if (kDebugMode) {
+                    // print(snapshot.data?.length);
+                  }
+                  final foods = snapshot.data!;
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: foods.length,
+                    itemBuilder: (context, index) => buildFood(foods[index]),
+                  );
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
           ),
         ),
       ),
@@ -123,6 +113,7 @@ class _OutletState extends State<Outlet> {
               width: 15,
             ),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SmallFont(
                   text: food.name,
@@ -141,55 +132,15 @@ class _OutletState extends State<Outlet> {
               ],
             ),
             const Spacer(),
-            // Row(
-            //   children: [
-
-            //     // const SizedBox(
-            //     //   width: 120,
-            //     // ),
-            //     GestureDetector(
-            //       onTap: () {
-            //         setState(() {
-            //           food.isAvailable = !food.isAvailable;
-            //         });
-            //       },
-            //       child: AnimatedContainer(
-            //         duration: const Duration(milliseconds: 300),
-            //         width: 50.0,
-            //         // height: 50.0,
-            //         decoration: BoxDecoration(
-            //           borderRadius: BorderRadius.circular(25.0),
-            //           color: food.isAvailable ? Colors.green : Colors.red,
-            //         ),
-            //         child: Row(
-            //           mainAxisAlignment: food.isAvailable
-            //               ? MainAxisAlignment.end
-            //               : MainAxisAlignment.start,
-            //           children: [
-            //             Container(
-            //               width: 50.0,
-            //               height: 50.0,
-            //               decoration: const BoxDecoration(
-            //                 shape: BoxShape.circle,
-            //                 color: Colors.white,
-            //               ),
-            //               child: Icon(
-            //                 food.isAvailable ? Icons.check : Icons.close,
-            //                 color: food.isAvailable
-            //                     ? Colors.green
-            //                     : Colors.red,
-            //               ),
-            //             ),
-            //           ],
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
-
             Column(
               children: [
-                Text("Availablity",style: TextStyle(fontSize: 12,color: Colors.black,fontWeight:FontWeight.w400),),
+                const Text(
+                  "Availablity",
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400),
+                ),
                 Switch(
                   value: food.isAvailable,
                   onChanged: (value) async {

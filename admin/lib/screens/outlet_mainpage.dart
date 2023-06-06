@@ -1,7 +1,10 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:admin/screens/add_item_page.dart';
+import 'package:admin/screens/new_outlet.dart';
 import 'package:admin/screens/outlet.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -15,17 +18,26 @@ class OutletMainPage extends StatefulWidget {
 }
 
 class _OutletMainPageState extends State<OutletMainPage> {
-  var _selectedIndex = 0;
   late PersistentTabController _controller;
   List pages = [
     Outlet(),
     ItemAdd(isEdit: false),
-    Container(child: Center(child: Text("Next page"))),
+    Center(child: Text("Next page")),
   ];
 
   void ontapNavigation(int index) {
-    setState(() {
-      _selectedIndex = index;
+    setState(() {});
+  }
+
+  checkMerchatData() {
+    FirebaseFirestore.instance
+        .collection("Merchants")
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .get()
+        .then((value) {
+      if (value.data() == null) {
+        PersistentNavBarNavigator.pushNewScreen(context, screen: NewOutlet());
+      }
     });
   }
 
@@ -33,6 +45,7 @@ class _OutletMainPageState extends State<OutletMainPage> {
   void initState() {
     super.initState();
     _controller = PersistentTabController(initialIndex: 0);
+    checkMerchatData();
   }
 
   List<Widget> _buildScreens() {

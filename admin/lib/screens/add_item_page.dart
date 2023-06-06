@@ -37,14 +37,13 @@ class ItemAdd extends StatefulWidget {
 }
 
 class _ItemAddState extends State<ItemAdd> {
-  List? items;
-  List? itemIdList;
+  List items = [];
+  List itemIdList = [];
   String? selectedValue;
   bool isLoading = true;
   String? itemName;
   int? itemPrice;
   bool isVeg = true;
-  bool isAvailable = true;
   String imageLink =
       "https://images.everydayhealth.com/images/diet-nutrition/34da4c4e-82c3-47d7-953d-121945eada1e00-giveitup-unhealthyfood.jpg?sfvrsn=a31d8d32_0";
   String? description;
@@ -56,8 +55,6 @@ class _ItemAddState extends State<ItemAdd> {
 
   final _newCategoryController = TextEditingController();
 
-
-
   @override
   void initState() {
     super.initState();
@@ -67,11 +64,10 @@ class _ItemAddState extends State<ItemAdd> {
       _itemPriceController.text = widget.itemPrice!.toString();
       selectedValue = widget.category;
       isVeg = widget.isVeg!;
-      isAvailable = widget.isAvailable!;
       _itemImageController.text = widget.imageLink!;
       _itemDescriptionController.text = widget.description!;
     } else {
-      // generateItemId();
+      generateItemId();
     }
     getcategories();
   }
@@ -228,7 +224,7 @@ class _ItemAddState extends State<ItemAdd> {
                               color: Colors.black54,
                             ),
                           ),
-                          items: items!
+                          items: items
                               .map((item) => DropdownMenuItem<String>(
                                     value: item,
                                     child: Text(
@@ -318,64 +314,6 @@ class _ItemAddState extends State<ItemAdd> {
                           borderRadius: BorderRadius.all(Radius.circular(20))),
                       padding: const EdgeInsets.all(12.0),
                       child: const Icon(
-                        CupertinoIcons.money_rubl_circle,
-                        color: Colors.white,
-                        size: 16.0,
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    ChoiceChip(
-                      label: Text(
-                        "Available",
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: isAvailable ? Colors.white : Colors.black),
-                      ),
-                      selected: isAvailable ? true : false,
-                      selectedColor: Colors.green,
-                      onSelected: (val) {
-                        if (val) {
-                          setState(() {
-                            isAvailable = true;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    ChoiceChip(
-                      label: Text(
-                        "Unavailable",
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: !isAvailable ? Colors.white : Colors.black),
-                      ),
-                      selected: !isAvailable ? true : false,
-                      selectedColor: Colors.red,
-                      onSelected: (val) {
-                        if (val) {
-                          setState(() {
-                            isAvailable = false;
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                          color: Colors.amber,
-                          borderRadius: BorderRadius.all(Radius.circular(20))),
-                      padding: const EdgeInsets.all(12.0),
-                      child: const Icon(
                         CupertinoIcons.money_dollar_circle,
                         color: Colors.white,
                         size: 16.0,
@@ -388,6 +326,7 @@ class _ItemAddState extends State<ItemAdd> {
                       child: TextField(
                         readOnly: true,
                         onTap: () {
+                          if (Platform.isIOS) return;
                           selectImage();
                         },
                         controller: _itemImageController,
@@ -397,9 +336,7 @@ class _ItemAddState extends State<ItemAdd> {
                         ),
                         style:
                             const TextStyle(fontSize: 16, color: Colors.black),
-                        onChanged: (value) {
-                          try {} catch (e) {}
-                        },
+                        onChanged: (value) {},
                       ),
                     ),
                   ],
@@ -459,23 +396,28 @@ class _ItemAddState extends State<ItemAdd> {
 
   getcategories() async {
     await FirebaseFirestore.instance
-        .collection("Catagories")
+        .collection("Merchants")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("Categories")
         .get()
         .then((value) => items = value.docs.map((e) => e.id).toList());
-    items!.removeWhere((element) => element == "All");
+    items.removeWhere((element) => element == "All");
     isLoading = false;
     setState(() {});
   }
 
   generateItemId() async {
+    itemIdList.clear();
     await FirebaseFirestore.instance
         .collection("Merchants")
-        .doc("FirebaseAuth.instance.currentUser!.uid")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection("Menu")
         .get()
-        .then((value) => itemIdList = value.docs.map((e) => e.id).toList());
-    _itemIdController.text =
-        (int.parse(itemIdList?[itemIdList!.length - 1]) + 1).toString();
+        .then(
+            (value) => itemIdList.addAll(value.docs.map((e) => e.id).toList()));
+    _itemIdController.text = itemIdList.isEmpty
+        ? "100"
+        : (int.parse(itemIdList[itemIdList.length - 1]) + 1).toString();
   }
 
   Future addItem() async {
@@ -509,7 +451,6 @@ class _ItemAddState extends State<ItemAdd> {
             textColor: Colors.white,
             fontSize: 16.0);
       } else {
-        print("Xyz");
         await FirebaseFirestore.instance
             .collection("Merchants")
             .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -524,7 +465,7 @@ class _ItemAddState extends State<ItemAdd> {
           "name": _itemNameController.text,
           "category": selectedValue,
           "veg": isVeg,
-          "isAvailable": isAvailable,
+          "isAvailable": true,
           "price": int.parse(_itemPriceController.text)
         }).whenComplete(() => Fluttertoast.showToast(
                         msg: "Item Added",
@@ -539,7 +480,7 @@ class _ItemAddState extends State<ItemAdd> {
                   _itemImageController.clear();
                   _itemNameController.clear();
                   _itemPriceController.clear();
-                  //await generateItemId();
+                  await generateItemId();
                   setState(() {});
                 }));
       }
@@ -568,8 +509,12 @@ class _ItemAddState extends State<ItemAdd> {
               ElevatedButton(
                 child: const Text('OK'),
                 onPressed: () async {
-                  FirebaseFirestore.instance.collection("Categories")
-                    .doc(_newCategoryController.text).set({});
+                  FirebaseFirestore.instance
+                      .collection("Merchants")
+                      .doc(FirebaseAuth.instance.currentUser!.uid)
+                      .collection("Categories")
+                      .doc(_newCategoryController.text)
+                      .set({});
                   setState(() {
                     getcategories();
                     Navigator.pop(context);
@@ -582,16 +527,9 @@ class _ItemAddState extends State<ItemAdd> {
   }
 
   void selectImage() async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      // Handle the selected image here
-      // You can upload the image to Firestore using Firebase Storage
-      // and store the download URL in the Firestore document
-      // For example:
-      // 1. Upload the image to Firebase Storage and get the download URL
-      // 2. Save the download URL to Firestore
-      // 3. Update the image link in the _itemImageController
       String imageLink = await uploadImageToFirestore(image.path);
       _itemImageController.text = imageLink;
     }

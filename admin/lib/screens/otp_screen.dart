@@ -103,7 +103,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const OutletMainPage()),
+                                  builder: (context) => const NewOutlet()),
                               (route) => false);
                         }
                       });
