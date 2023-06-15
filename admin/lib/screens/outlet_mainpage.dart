@@ -1,8 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:admin/screens/add_item_page.dart';
+import 'package:admin/screens/login_screen.dart';
 import 'package:admin/screens/new_outlet.dart';
-import 'package:admin/screens/outlet.dart';
+import 'package:admin/screens/menu_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,7 +21,7 @@ class OutletMainPage extends StatefulWidget {
 class _OutletMainPageState extends State<OutletMainPage> {
   late PersistentTabController _controller;
   List pages = [
-    Outlet(),
+    Menu(),
     ItemAdd(isEdit: false),
     Center(child: Text("Next page")),
   ];
@@ -50,9 +51,19 @@ class _OutletMainPageState extends State<OutletMainPage> {
 
   List<Widget> _buildScreens() {
     return [
-      Outlet(),
+      Menu(),
       ItemAdd(isEdit: false),
-      Container(child: Center(child: Text("Next page"))),
+      Center(
+          child: ElevatedButton(
+        onPressed: () {
+          FirebaseAuth.instance.signOut().then((value) =>
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (route) => false));
+        },
+        child: Text("Logout"),
+      )),
     ];
   }
 

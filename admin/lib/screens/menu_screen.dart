@@ -5,14 +5,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class Outlet extends StatefulWidget {
-  const Outlet({Key? key}) : super(key: key);
+class Menu extends StatefulWidget {
+  const Menu({Key? key}) : super(key: key);
 
   @override
-  State<Outlet> createState() => _OutletState();
+  State<Menu> createState() => _MenuState();
 }
 
-class _OutletState extends State<Outlet> {
+class _MenuState extends State<Menu> {
   PageController pageController = PageController(viewportFraction: 0.85);
 
   @override
