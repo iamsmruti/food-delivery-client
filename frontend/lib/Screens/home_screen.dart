@@ -1,17 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/Custom%20UI/food_card.dart';
 import 'package:frontend/Custom%20UI/resturant_info.dart';
 import 'package:frontend/Models/food.dart';
 import 'package:frontend/constant.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class MenuScreen extends StatefulWidget {
+  final String restaurantId;
+  const MenuScreen({Key? key, required this.restaurantId}) : super(key: key);
+
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<MenuScreen> createState() => _MenuScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _MenuScreenState extends State<MenuScreen> {
   int selectedChipIndex = 0;
   List<String> categoryMenu = [
     "Chinese Items",
@@ -49,24 +52,39 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(
               height: 15,
             ),
-            Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                itemCount: 7,
-                itemBuilder: ((context, index) {
-                  return FoodCard(Food(
-                      image:
-                          "https://images.theconversation.com/files/368263/original/file-20201109-22-lqiq5c.jpg?ixlib=rb-1.1.0&rect=10%2C0%2C6699%2C4476&q=45&auto=format&w=926&fit=clip",
-                      price: 200,
-                      name: "How $index",
-                      description: "Now",
-                      id: "105",
-                      category: "Dinner",
-                      isVeg: true,
-                      isAvilable: true));
-                }),
+            Container(
+              child: FutureBuilder<List<Food>>(
+                future: fetchMenuItems(widget.restaurantId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (snapshot.hasData) {
+                    List<Food> menuItems = snapshot.data!;
+                    
+                    return ListView.builder(
+                      itemCount: menuItems.length,
+                      itemBuilder: (context, index) {
+                        Food menuItem = menuItems[index];
+                        return FoodCard(Food(
+                            image:
+                                menuItem.image,
+                            price: menuItem.price,
+                            name: menuItem.name,
+                            description: menuItem.description,
+                            id: menuItem.id,
+                            category: menuItem.category,
+                            isVeg: menuItem.isVeg,
+                            isAvilable: menuItem.isAvilable,));
+                      },
+                    );
+                  } else {
+                    return Text('No menu items available');
+                  }
+                },
               ),
-            ),
+            )
           ],
         ),
       ),
@@ -85,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Card(
               shape: roundedRectangle12,
               color: secondaryColor,
-              child:  Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -157,5 +175,32 @@ class _HomeScreenState extends State<HomeScreen> {
       chips.add(item);
     }
     return chips;
+  }
+
+  Future<List<Food>> fetchMenuItems(String restaurantId) async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('Merchants')
+        .doc(widget
+            .restaurantId) 
+        .collection('Menu')
+        .get();
+
+    List<Food> menuItems = snapshot.docs.map((DocumentSnapshot doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      return Food(
+        name: data['name'],
+        description: data['description'],
+        category: data['categoty'],
+        price: data['price'],
+        isAvilable: data['isAvailable'],
+        id: data['id'],
+        isVeg: data['veg'],
+        image: data['image'],
+        
+      );
+    }).toList();
+
+    return menuItems;
   }
 }

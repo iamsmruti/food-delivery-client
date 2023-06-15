@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frontend/Screens/home_screen.dart';
+import 'package:frontend/Screens/restaurants_screen.dart';
 import 'package:frontend/constant.dart';
 import 'package:pinput/pinput.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,7 +94,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                       PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: widget.verificationId, smsCode: _verificationCode!);
                       await FirebaseAuth.instance.signInWithCredential(credential).then((value) {
                         if(value.user != null){
-                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
+                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const RestaurantsScreen()), (route) => false);
                         }
                       });
                     } on FirebaseAuthException catch (e) {

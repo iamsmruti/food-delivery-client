@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/Screens/home_screen.dart';
+import 'package:frontend/Screens/restaurants_screen.dart';
 import 'package:frontend/constant.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
@@ -54,12 +55,12 @@ class BottomNav extends StatelessWidget {
       
     ];
     List<Widget> screens = const [
+      RestaurantsScreen(),
       Scaffold(
         body: Center(
           child: Text("Demo Page 1"),
         ),
       ),
-      HomeScreen(),
       Scaffold(
         body: Center(
           child: Text("Demo Page 2"),
