@@ -156,7 +156,11 @@ class FoodCardState extends ConsumerState<FoodCard>
     return Padding(
       padding: const EdgeInsets.only(left: 0, right: 16, bottom: 8, top: 8),
       child: !item.food.isAvilable
-          ? const Text("Not Available")
+          ? const Icon(
+              Icons.dangerous,
+              size: 34,
+              color: Colors.red,
+            )
           : item.quantity == 0
               ? ElevatedButton(
                   style:

@@ -14,6 +14,14 @@ class Menu extends StatefulWidget {
 
 class _MenuState extends State<Menu> {
   PageController pageController = PageController(viewportFraction: 0.85);
+  int selectedChipIndex = 0;
+  List categoryMenu = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getCategories();
+  }
 
   @override
   void dispose() {
@@ -30,12 +38,16 @@ class _MenuState extends State<Menu> {
         return Food.foodList(snapshot);
       });
 
-  Future<List<String>> getCategories() async => await FirebaseFirestore.instance
-      .collection("Merchants")
-      .doc(FirebaseAuth.instance.currentUser!.uid)
-      .collection("Categories")
-      .get()
-      .then((value) => value.docs.map((e) => e.id).toList());
+  getCategories() async {
+    categoryMenu = await FirebaseFirestore.instance
+        .collection("Merchants")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("Categories")
+        .get()
+        .then((value) => value.docs.map((e) => e.id).toList());
+    categoryMenu.insert(0, "All");
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,35 +66,85 @@ class _MenuState extends State<Menu> {
         ),
         body: Container(
           padding: const EdgeInsets.all(10),
-          child: SingleChildScrollView(
-            child: StreamBuilder<List<Food>>(
-              stream: readFoodDetails(),
-              builder: (context, snapshot) {
-                if (kDebugMode) {
-                  print(snapshot.data?.length);
-                }
-                if (snapshot.hasError) {
-                  return Text("Error: ${snapshot.error.toString()}");
-                } else if (snapshot.hasData) {
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: choiceChips(categoryMenu),
+                  ),
+                ),
+              ),
+              StreamBuilder<List<Food>>(
+                stream: readFoodDetails(),
+                builder: (context, snapshot) {
                   if (kDebugMode) {
-                    // print(snapshot.data?.length);
+                    print(snapshot.data?.length);
                   }
-                  final foods = snapshot.data!;
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: foods.length,
-                    itemBuilder: (context, index) => buildFood(foods[index]),
-                  );
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              },
-            ),
+                  if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error.toString()}");
+                  } else if (snapshot.hasData) {
+                    final foods = snapshot.data!;
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: foods.length,
+                      itemBuilder: (context, index) {
+                        if (foods[index].category ==
+                            categoryMenu[selectedChipIndex]) {
+                          return const SizedBox.shrink();
+                        }
+                        return buildFood(foods[index]);
+                      },
+                    );
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  List<Widget> choiceChips(
+    List menu,
+  ) {
+    List<Widget> chips = [];
+    for (int i = 0; i < menu.length; i++) {
+      Widget item = Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                selectedChipIndex = i;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                  color: selectedChipIndex == i
+                      ? const Color.fromARGB(200, 31, 117, 254)
+                      : Colors.blueGrey,
+                  borderRadius: BorderRadius.circular(20)),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                child: Center(
+                    child: Text(
+                  menu[i],
+                  style: const TextStyle(color: Colors.white),
+                )),
+              ),
+            ),
+          ));
+      chips.add(item);
+    }
+    return chips;
   }
 
   Widget buildFood(Food food) {

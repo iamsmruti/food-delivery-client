@@ -4,10 +4,12 @@ import 'package:frontend/Models/cart_model.dart';
 import 'package:frontend/constant.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
+import '../Models/merchart.dart';
 import '../Screens/cart_screen.dart';
 
 class RestaurantInfo extends ConsumerWidget {
-  const RestaurantInfo({super.key});
+  final Merchant merchant;
+  const RestaurantInfo({super.key, required this.merchant});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,16 +31,18 @@ class RestaurantInfo extends ConsumerWidget {
                         IconButton(
                             padding: const EdgeInsets.only(top: 5),
                             constraints: const BoxConstraints(),
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
                             icon: const Icon(
                               Icons.arrow_back_ios,
                             )),
                         const SizedBox(
                           width: 5,
                         ),
-                        const Text(
-                          "Black Box",
-                          style: TextStyle(
+                        Text(
+                          (merchant.name)!,
+                          style: const TextStyle(
                               fontSize: 28, fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -126,10 +130,10 @@ class RestaurantInfo extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Orange Is Good For Health",
-                    style: TextStyle(fontSize: 16)),
-                Row(
-                  children: const [
+                Text((merchant.description)!,
+                    style: const TextStyle(fontSize: 16)),
+                const Row(
+                  children: [
                     Icon(Icons.star_outline, color: primaryColor),
                     SizedBox(
                       width: 5,

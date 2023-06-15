@@ -1,12 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frontend/Screens/home_screen.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-
 import '../Custom UI/big_font.dart';
 import '../Custom UI/small_font.dart';
 import '../Models/merchart.dart';
@@ -26,7 +24,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
   String currentAddress = 'My Address';
   late Position currentposition;
 
-  Future _determinePosition() async {
+  Future determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -64,7 +62,9 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
             "${place.locality}, ${place.postalCode}, ${place.country}";
       });
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -73,152 +73,133 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
   int selectedIndex = -1;
 
   @override
+  void initState() {
+    super.initState();
+    determinePosition();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Color.fromARGB(255, 237, 228, 202),
-        body: SingleChildScrollView(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.blueGrey.withOpacity(0.5),
-                  Colors.white,
-                ],
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-              ),
+        backgroundColor: const Color.fromARGB(255, 237, 228, 202),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.blueGrey.withOpacity(0.5),
+                Colors.white,
+              ],
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
             ),
-            padding: EdgeInsets.all(15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 10 / 3,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    _determinePosition();
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.location_on, size: 20, color: Colors.black),
-                      SmallFont(
-                        text: currentAddress,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ],
+          ),
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 10 / 3,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.location_on, size: 20, color: Colors.black),
+                  SmallFont(
+                    text: currentAddress,
+                    fontWeight: FontWeight.w500,
                   ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                SmallFont(
-                  text: "Stories",
-                  fontWeight: FontWeight.bold,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  height: 45 * 2.4,
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 7,
-                    itemBuilder: (context, position) {
-                      return _buildCategoriesItem(position);
-                    },
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  height: 20 * 2.3,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: Offset(
-                            0, 3), // changes the shadow direction vertically
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintStyle: const TextStyle(fontSize: 17),
-                      hintText: 'Search Food Items',
-                      prefixIcon: Container(
-                        child: const Icon(
-                          Icons.search,
-                          color: Colors.black,
-                        ),
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.all(10),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Container(
+                height: 20 * 2.3,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(
+                          0, 3), // changes the shadow direction vertically
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        searchQuery = value;
-                      });
-                    },
+                  ],
+                ),
+                child: TextField(
+                  decoration: const InputDecoration(
+                    hintStyle: TextStyle(fontSize: 17),
+                    hintText: 'Search Food Items',
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Colors.black,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.all(10),
                   ),
+                  onChanged: (value) {
+                    setState(() {
+                      searchQuery = value;
+                    });
+                  },
                 ),
-                SizedBox(
-                  height: 30,
-                ),
-                SmallFont(
-                  text: "Nearby Restaurant",
-                  fontWeight: FontWeight.bold,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                FutureBuilder<List<Merchant>>(
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              SmallFont(
+                text: "Nearby Restaurant",
+                fontWeight: FontWeight.bold,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Expanded(
+                child: FutureBuilder<List<Merchant>>(
                   future: fetchMerchantData(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
+                      return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
                     } else if (snapshot.hasData) {
                       List<Merchant> shops = snapshot.data!;
                       return ListView.builder(
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
                         itemCount: shops.length,
                         itemBuilder: (context, index) {
                           Merchant shop = shops[index];
-                          return ShopCard(shop);
+                          return shopCard(shop);
                         },
                       );
                     } else {
-                      return Text('No data available');
+                      return const Text('No data available');
                     }
                   },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget ShopCard(Merchant shop) {
+  Widget shopCard(Merchant shop) {
     return GestureDetector(
       onTap: () {
-        print(shop.id);
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MenuScreen(restaurantId: shop.id!),
+            builder: (context) => MenuScreen(
+              shop: shop,
+            ),
           ),
         );
       },
@@ -234,7 +215,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: Image(
+                child: const Image(
                   image: AssetImage("assets/images/cafe.png"),
                   fit: BoxFit.cover,
                   width: double.infinity,
@@ -254,42 +235,36 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                     color: Colors.grey.withOpacity(0.7),
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset:
-                        Offset(0, 3), // changes the shadow direction vertically
+                    offset: const Offset(
+                        0, 3), // changes the shadow direction vertically
                   ),
                 ],
                 color: Colors.blueGrey,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(15),
                   bottomRight: Radius.circular(15),
                 ),
               ),
-              height: 20 * 2.4,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: 10 / 3,
-                          ),
-                          BigFont(
-                            text: shop.name!,
-                            color: Colors.white,
-                          ),
-                          SmallFont(
-                            text: shop.description!,
-                            size: 10 / 1.1,
-                          ),
-                        ],
-                      ),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 10, bottom: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      height: 10 / 3,
                     ),
-                  ),
-                ],
+                    BigFont(
+                      text: shop.name!,
+                      color: Colors.white,
+                    ),
+                    SmallFont(
+                      text: shop.description!,
+                      size: 10 / 1.1,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -300,7 +275,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
             child: Container(
               height: 28,
               width: 60,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Color(0xFF4CBB17),
                 borderRadius: BorderRadius.all(
                   Radius.circular(10 / 3),
@@ -309,17 +284,17 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
               child: Center(
                 child: Row(
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       width: 10 / 2,
                     ),
                     SmallFont(
                       text: "4.5",
                       color: Colors.white,
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 10 / 3,
                     ),
-                    Icon(
+                    const Icon(
                       Icons.star,
                       size: 10,
                       color: Colors.white,
@@ -334,7 +309,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
     );
   }
 
-  Widget _buildCategoriesItem(int index) {
+  Widget buildCategoriesItem(int index) {
     return Stack(
       children: [
         GestureDetector(
@@ -359,7 +334,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
     );
   }
 
-  Widget _buildMenuItem(int index) {
+  Widget buildMenuItem(int index) {
     return Stack(
       children: [
         GestureDetector(
@@ -370,7 +345,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
             });
           },
           child: AnimatedContainer(
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             height: 20 * 1.7,
             width: selectedIndex == index ? 20 * 3.5 : 20 * 2.5,
             margin: const EdgeInsets.only(right: 10),
@@ -382,14 +357,14 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                   color: Colors.grey.withOpacity(0.7),
                   spreadRadius: 2,
                   blurRadius: 5,
-                  offset:
-                      Offset(0, 3), // changes the shadow direction vertically
+                  offset: const Offset(
+                      0, 3), // changes the shadow direction vertically
                 ),
               ],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Icon(Icons.food_bank_outlined),
+              child: const Icon(Icons.food_bank_outlined),
             ),
           ),
         ),
