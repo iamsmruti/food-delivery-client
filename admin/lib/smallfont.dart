@@ -19,13 +19,15 @@ class SmallFont extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      text,
+      text,maxLines: 1,
       //overflow: overflow,
       style: TextStyle(
+        
           color: color,
           fontFamily: 'ROBOTO',
           fontSize: size,
           height: height,
+          
           overflow: null),
     );
   }
