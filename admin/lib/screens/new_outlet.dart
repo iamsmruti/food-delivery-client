@@ -6,16 +6,38 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
-class NewOutlet extends StatefulWidget {
+import 'map.dart';
+
+final venueDataProv =
+    ChangeNotifierProvider<VenueProvider>((ref) => VenueProvider(ref));
+
+class VenueProvider extends ChangeNotifier {
+  VenueProvider(this.ref);
+  final Ref ref;
+  TextEditingController venueController = TextEditingController();
+  String? latitude;
+  String? longitude;
+
+  setAddress(TextEditingController controller, String lat, String long) {
+    venueController = controller;
+    latitude = lat;
+    longitude = long;
+    notifyListeners();
+  }
+}
+
+class NewOutlet extends ConsumerStatefulWidget {
   const NewOutlet({super.key});
 
   @override
-  State<NewOutlet> createState() => _NewOutletState();
+  ConsumerState<NewOutlet> createState() => _NewOutletState();
 }
 
-class _NewOutletState extends State<NewOutlet> {
+class _NewOutletState extends ConsumerState<NewOutlet> {
   bool isLoading = false;
 
   String? name;
@@ -55,6 +77,12 @@ class _NewOutletState extends State<NewOutlet> {
         Fluttertoast.showToast(msg: "$error");
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(venueDataProv).venueController = TextEditingController();
   }
 
   @override
@@ -126,33 +154,40 @@ class _NewOutletState extends State<NewOutlet> {
                 ),
               ),
               const SizedBox(height: 30),
-              TextField(
-                onChanged: (value) async {
-                  predictions =
-                      await GoogleMapsHandler().getAutocomplete(value);
-                  setState(() {
-                    predictionWidget = true;
-                  });
+              InkWell(
+                onTap: () {
+                  PersistentNavBarNavigator.pushNewScreen(context,
+                      screen: const Maps());
                 },
-                controller: searchQueryController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  hintText: 'Location',
-                  hintStyle:
-                      TextStyle(color: Color.fromARGB(255, 182, 182, 182)),
-                  prefixIcon: Icon(
-                    Icons.location_searching,
-                    color: Color.fromARGB(255, 182, 182, 182),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color.fromARGB(255, 182, 182, 182)),
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color.fromARGB(255, 182, 182, 182)),
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                child: TextField(
+                  onChanged: (value) async {},
+                  // readOnly: true,
+                  controller: ref.watch(venueDataProv).venueController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    hintText: 'Location',
+                    enabled: false,
+                    hintStyle:
+                        TextStyle(color: Color.fromARGB(255, 182, 182, 182)),
+                    prefixIcon: Icon(
+                      Icons.location_searching,
+                      color: Color.fromARGB(255, 182, 182, 182),
+                    ),
+                    disabledBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Color.fromARGB(255, 182, 182, 182)),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Color.fromARGB(255, 182, 182, 182)),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Color.fromARGB(255, 182, 182, 182)),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
                   ),
                 ),
               ),

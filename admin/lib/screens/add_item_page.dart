@@ -24,6 +24,7 @@ class ItemAdd extends StatefulWidget {
       this.category});
   final bool isEdit;
   final String? itemId;
+
   final String? itemName;
   final int? itemPrice;
   final bool? isVeg;
@@ -77,9 +78,13 @@ class _ItemAddState extends State<ItemAdd> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          "Add Items",
-        ),
+        title: widget.isEdit
+            ? const Text(
+                "Update Item",
+              )
+            : const Text(
+                "Add Item",
+              ),
         actions: [
           IconButton(
               onPressed: displayTextInputDialog, icon: const Icon(Icons.add))
@@ -406,7 +411,7 @@ class _ItemAddState extends State<ItemAdd> {
     setState(() {});
   }
 
-  generateItemId() async {
+  Future<String> generateItemId() async {
     itemIdList.clear();
     await FirebaseFirestore.instance
         .collection("Merchants")
@@ -415,12 +420,15 @@ class _ItemAddState extends State<ItemAdd> {
         .get()
         .then(
             (value) => itemIdList.addAll(value.docs.map((e) => e.id).toList()));
-    _itemIdController.text = itemIdList.isEmpty
+    String generatedItemId = itemIdList.isEmpty
         ? "100"
         : (int.parse(itemIdList[itemIdList.length - 1]) + 1).toString();
+
+    _itemIdController.text = generatedItemId;
+    return generatedItemId;
   }
 
-  Future addItem() async {
+  Future<void> addItem() async {
     bool checkItemId = await FirebaseFirestore.instance
         .collection("Merchants")
         .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -428,61 +436,98 @@ class _ItemAddState extends State<ItemAdd> {
         .doc(_itemIdController.text)
         .get()
         .then((value) => value.exists);
+
+    // Disable itemId check for updates
     if (widget.isEdit) {
       checkItemId = false;
     }
+
     if (checkItemId) {
       Fluttertoast.showToast(
-          msg: "Item Id already Exits",
+        msg: "Item Id already exists",
+        toastLength: Toast.LENGTH_SHORT,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    } else if (selectedValue == null ||
+        _itemNameController.text.isEmpty ||
+        _itemPriceController.text.isEmpty) {
+      Fluttertoast.showToast(
+        msg: "Fill properly",
+        toastLength: Toast.LENGTH_SHORT,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    } else {
+      // Prepare the data to be added or updated
+      Map<String, dynamic> itemData = {
+        "id": _itemIdController.text,
+        "description": _itemDescriptionController.text,
+        "image": _itemImageController.text.isEmpty
+            ? imageLink
+            : _itemImageController.text,
+        "name": _itemNameController.text,
+        "category": selectedValue,
+        "veg": isVeg,
+        "isAvailable": true,
+        "price": int.parse(_itemPriceController.text),
+      };
+
+      try {
+        if (widget.isEdit) {
+          // Update existing item
+          await FirebaseFirestore.instance
+              .collection("Merchants")
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .collection("Menu")
+              .doc(widget.itemId)
+              .update(itemData);
+          Fluttertoast.showToast(
+            msg: "Item Updated",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        } else {
+          // Add new item
+          await FirebaseFirestore.instance
+              .collection("Merchants")
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .collection("Menu")
+              .doc(_itemIdController.text)
+              .set(itemData);
+          Fluttertoast.showToast(
+            msg: "Item Added",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          // Clear input fields and generate a new itemId
+          _itemDescriptionController.clear();
+          _itemIdController.clear();
+          _itemImageController.clear();
+          _itemNameController.clear();
+          _itemPriceController.clear();
+          await generateItemId();
+          setState(() {});
+        }
+      } catch (error) {
+        Fluttertoast.showToast(
+          msg: "Failed to ${widget.isEdit ? 'update' : 'add'} item: $error",
           toastLength: Toast.LENGTH_SHORT,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.red,
           textColor: Colors.white,
-          fontSize: 16.0);
-    } else {
-      if (selectedValue == null ||
-          _itemNameController.text.isEmpty ||
-          _itemPriceController.text.isEmpty) {
-        Fluttertoast.showToast(
-            msg: "Fill Properly",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
-      } else {
-        await FirebaseFirestore.instance
-            .collection("Merchants")
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .collection("Menu")
-            .doc(_itemIdController.text)
-            .set({
-          "id": _itemIdController.text,
-          "description": _itemDescriptionController.text,
-          "image": _itemImageController.text.isEmpty
-              ? imageLink
-              : _itemImageController.text,
-          "name": _itemNameController.text,
-          "category": selectedValue,
-          "veg": isVeg,
-          "isAvailable": true,
-          "price": int.parse(_itemPriceController.text)
-        }).whenComplete(() => Fluttertoast.showToast(
-                        msg: "Item Added",
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 1,
-                        backgroundColor: Colors.red,
-                        textColor: Colors.white,
-                        fontSize: 16.0)
-                    .then((value) async {
-                  _itemDescriptionController.clear();
-                  _itemIdController.clear();
-                  _itemImageController.clear();
-                  _itemNameController.clear();
-                  _itemPriceController.clear();
-                  await generateItemId();
-                  setState(() {});
-                }));
+          fontSize: 16.0,
+        );
       }
     }
   }
