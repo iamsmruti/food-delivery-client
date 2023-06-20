@@ -64,50 +64,55 @@ class _MenuState extends State<Menu> {
           ),
           centerTitle: true,
         ),
-        body: Container(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: choiceChips(categoryMenu),
-                  ),
+        body: categoryMenu.isEmpty
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : Container(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: choiceChips(categoryMenu),
+                        ),
+                      ),
+                    ),
+                    StreamBuilder<List<Food>>(
+                      stream: readFoodDetails(),
+                      builder: (context, snapshot) {
+                        if (kDebugMode) {
+                          print(snapshot.data?.length);
+                        }
+                        if (snapshot.hasError) {
+                          return Text("Error: ${snapshot.error.toString()}");
+                        } else if (snapshot.hasData) {
+                          final foods = snapshot.data!;
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: foods.length,
+                            itemBuilder: (context, index) {
+                              if (foods[index].category ==
+                                  categoryMenu[selectedChipIndex]) {
+                                return const SizedBox.shrink();
+                              }
+                              return buildFood(foods[index]);
+                            },
+                          );
+                        } else {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
-              StreamBuilder<List<Food>>(
-                stream: readFoodDetails(),
-                builder: (context, snapshot) {
-                  if (kDebugMode) {
-                    print(snapshot.data?.length);
-                  }
-                  if (snapshot.hasError) {
-                    return Text("Error: ${snapshot.error.toString()}");
-                  } else if (snapshot.hasData) {
-                    final foods = snapshot.data!;
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: foods.length,
-                      itemBuilder: (context, index) {
-                        if (foods[index].category ==
-                            categoryMenu[selectedChipIndex]) {
-                          return const SizedBox.shrink();
-                        }
-                        return buildFood(foods[index]);
-                      },
-                    );
-                  } else {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
