@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:frontend/Custom%20UI/food_card.dart';
 import 'package:frontend/Custom%20UI/resturant_info.dart';
 import 'package:frontend/Models/food.dart';
+import 'package:frontend/Screens/search_delegate.dart';
 import 'package:frontend/constant.dart';
 
 import '../Models/merchart.dart';
 
 class MenuScreen extends StatefulWidget {
   final Merchant shop;
-  const MenuScreen({Key? key, required this.shop}) : super(key: key);
+  final String distance;
+  const MenuScreen({Key? key, required this.shop, required this.distance})
+      : super(key: key);
 
   @override
   State<MenuScreen> createState() => _MenuScreenState();
@@ -18,6 +21,7 @@ class MenuScreen extends StatefulWidget {
 class _MenuScreenState extends State<MenuScreen> {
   int selectedChipIndex = 0;
   List categoryMenu = [];
+  List<Food> listOfItems = [];
 
   @override
   void initState() {
@@ -32,12 +36,14 @@ class _MenuScreenState extends State<MenuScreen> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(
               height: 20,
             ),
             RestaurantInfo(
               merchant: widget.shop,
+              distance: widget.distance,
             ),
             const SizedBox(
               height: 10,
@@ -50,6 +56,7 @@ class _MenuScreenState extends State<MenuScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: choiceChips(categoryMenu),
               ),
             ),
@@ -66,8 +73,9 @@ class _MenuScreenState extends State<MenuScreen> {
   Widget buildSearchBar() {
     return InkWell(
       onTap: (() {
-        // showSearch(
-        //     context: context, delegate: CustomSearchDelegate(data: itemList));
+        showSearch(
+            context: context,
+            delegate: CustomSearchDelegate(data: listOfItems));
       }),
       child: SizedBox(
           height: 60,
@@ -98,28 +106,31 @@ class _MenuScreenState extends State<MenuScreen> {
     return StreamBuilder<List<Food>>(
       stream: fetchMenuItems(widget.shop.id!),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting ||
+            categoryMenu.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
-        } else if (snapshot.hasData) {
-          List<Food> menuItems = snapshot.data!;
+        } else if (snapshot.hasData && categoryMenu.isNotEmpty) {
+          listOfItems = snapshot.data!;
+          final filteredFoods = listOfItems.where((food) {
+            if (categoryMenu[selectedChipIndex] == "All") {
+              return true;
+            } else {
+              return food.category == categoryMenu[selectedChipIndex];
+            }
+          }).toList();
+          if (filteredFoods.isEmpty) {
+            return const Center(
+              child: Text("No items in this category"),
+            );
+          }
           return Expanded(
             child: ListView.builder(
               padding: EdgeInsets.zero,
-              itemCount: menuItems.length,
+              itemCount: filteredFoods.length,
               itemBuilder: (context, index) {
-                Food menuItem = menuItems[index];
-                return FoodCard(Food(
-                  image: menuItem.image,
-                  price: menuItem.price,
-                  name: menuItem.name,
-                  description: menuItem.description,
-                  id: menuItem.id,
-                  category: menuItem.category,
-                  isVeg: menuItem.isVeg,
-                  isAvilable: menuItem.isAvilable,
-                ));
+                return FoodCard(filteredFoods[index]);
               },
             ),
           );
@@ -181,6 +192,8 @@ class _MenuScreenState extends State<MenuScreen> {
         .collection("Categories")
         .get()
         .then((value) => value.docs.map((e) => e.id).toList());
-    setState(() {});
+    setState(() {
+      categoryMenu.insert(0, "All");
+    });
   }
 }

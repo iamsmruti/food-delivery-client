@@ -251,7 +251,7 @@ class _AddressEditState extends State<AddressEdit> {
                         phoneNumber: phoneController.text,
                         city: cityController.text,
                         state: stateController.text));
-                    Navigator.pop(context);
+                    Navigator.pop(context,true);
                   });
                 }
               },

@@ -6,6 +6,17 @@
 	<string>This app needs access to location when open.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleURLTypes</key>
+       <array>
+           <dict>
+               <key>CFBundleTypeRole</key>
+               <string>Editor</string>
+               <key>CFBundleURLSchemes</key>
+               <array>
+                   <string>com.googleusercontent.apps.297194506295-4ql6sfu0cdkuq1su657mpthg81d0p64h</string>
+               </array>
+           </dict>
+       </array>
 	<key>CFBundleDisplayName</key>
 	<string>Frontend</string>
 	<key>CFBundleExecutable</key>
