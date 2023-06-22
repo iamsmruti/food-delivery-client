@@ -62,7 +62,7 @@ class FoodCardState extends ConsumerState<FoodCard>
             topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)),
         child: Image.network(
           widget.food.image,
-          fit: BoxFit.fitHeight,
+          fit: BoxFit.cover,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return Center(

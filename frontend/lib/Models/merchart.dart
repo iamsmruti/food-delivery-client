@@ -8,8 +8,8 @@ final merchatStateProvider = StateProvider<Merchant>((ref) {
 class Merchant extends ChangeNotifier {
   String? id;
   String? name;
-  String? latitude;
-  String? longitude;
+  double? latitude;
+  double? longitude;
   String? placeId;
   String? notificationToken;
   String? photoUrl;
@@ -25,17 +25,6 @@ class Merchant extends ChangeNotifier {
       this.phoneNumber,
       this.id,
       this.description});
-
-  changeMerchant(Merchant merchant) {
-    id=merchant.id;
-    name = merchant.name;
-    latitude = merchant.latitude;
-    longitude = merchant.longitude;
-    placeId = merchant.placeId;
-    notificationToken = merchant.notificationToken;
-    photoUrl = merchant.photoUrl;
-    phoneNumber = merchant.phoneNumber;
-    description = merchant.description;
-    notifyListeners();
-  }
 }
+
+

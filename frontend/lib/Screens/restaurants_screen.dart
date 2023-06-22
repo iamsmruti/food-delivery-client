@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:frontend/Screens/home_screen.dart';
+import 'package:frontend/Models/cart_model.dart';
+import 'package:frontend/Screens/menu_screen.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,20 +11,20 @@ import '../Custom UI/big_font.dart';
 import '../Custom UI/small_font.dart';
 import '../Models/merchart.dart';
 
-class RestaurantsScreen extends StatefulWidget {
+class RestaurantsScreen extends ConsumerStatefulWidget {
   const RestaurantsScreen({Key? key}) : super(key: key);
 
   @override
-  State<RestaurantsScreen> createState() => _RestaurantsScreenState();
+  ConsumerState<RestaurantsScreen> createState() => _RestaurantsScreenState();
 }
 
 final searchController = TextEditingController();
 String search = "";
 String searchQuery = '';
 
-class _RestaurantsScreenState extends State<RestaurantsScreen> {
+class _RestaurantsScreenState extends ConsumerState<RestaurantsScreen> {
   String currentAddress = 'My Address';
-  late Position currentposition;
+  Position? currentposition;
 
   Future determinePosition() async {
     bool serviceEnabled;
@@ -53,7 +55,6 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
     try {
       List<Placemark> placemarks =
           await placemarkFromCoordinates(position.latitude, position.longitude);
-
       Placemark place = placemarks[0];
 
       setState(() {
@@ -153,7 +154,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
               const SizedBox(
                 height: 30,
               ),
-              SmallFont(
+              const SmallFont(
                 text: "Nearby Restaurant",
                 fontWeight: FontWeight.bold,
               ),
@@ -164,18 +165,19 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                 child: FutureBuilder<List<Merchant>>(
                   future: fetchMerchantData(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting ||
+                        currentposition == null) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
-                    } else if (snapshot.hasData) {
+                    } else if (snapshot.hasData && currentposition != null) {
                       List<Merchant> shops = snapshot.data!;
                       return ListView.builder(
                         shrinkWrap: true,
                         itemCount: shops.length,
                         itemBuilder: (context, index) {
                           Merchant shop = shops[index];
-                          return shopCard(shop);
+                          return shopCard(shop, ref);
                         },
                       );
                     } else {
@@ -191,14 +193,21 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
     );
   }
 
-  Widget shopCard(Merchant shop) {
+  Widget shopCard(Merchant shop, WidgetRef ref) {
+    String distance = (Geolocator.distanceBetween(currentposition!.latitude,
+                currentposition!.longitude, shop.latitude!, shop.longitude!) /
+            1000)
+        .toStringAsFixed(2);
     return GestureDetector(
       onTap: () {
+        ref.read(merchatStateProvider.notifier).state = shop;
+        ref.read(cartDataProv).cartItems.clear();
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => MenuScreen(
               shop: shop,
+              distance: distance,
             ),
           ),
         );
@@ -271,36 +280,19 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
           Positioned(
             bottom: 100 / 1.65,
             left: 110 * 2.6,
-            right: 10 * 1.5,
+            right: 10 * 1.2,
             child: Container(
-              height: 28,
-              width: 60,
+              padding: const EdgeInsets.all(8),
               decoration: const BoxDecoration(
                 color: Color(0xFF4CBB17),
                 borderRadius: BorderRadius.all(
                   Radius.circular(10 / 3),
                 ),
               ),
-              child: Center(
-                child: Row(
-                  children: [
-                    const SizedBox(
-                      width: 10 / 2,
-                    ),
-                    SmallFont(
-                      text: "4.5",
-                      color: Colors.white,
-                    ),
-                    const SizedBox(
-                      width: 10 / 3,
-                    ),
-                    const Icon(
-                      Icons.star,
-                      size: 10,
-                      color: Colors.white,
-                    ),
-                  ],
-                ),
+              child: SmallFont(
+                text: "$distance KM",
+                color: Colors.white,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -380,10 +372,12 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
       return Merchant(
-        id: doc.id,
-        name: data['name'],
-        description: data['description'],
-      );
+          id: doc.id,
+          name: data['name'],
+          description: data['description'],
+          latitude: data['lat'],
+          longitude: data['lng'],
+          notificationToken: data['notif_token']);
     }).toList();
 
     return shops;

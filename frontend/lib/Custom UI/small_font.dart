@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SmallFont extends StatelessWidget {
-  Color? color;
+  final Color? color;
   final String text;
-  double size;
-  double height;
-  TextOverflow overflow;
-  FontWeight? fontWeight;
+  final double size;
+  final double height;
+  final TextOverflow overflow;
+  final FontWeight? fontWeight;
 
-  SmallFont(
+  const SmallFont(
       {super.key,
       this.color = const Color(0xFF332d2b),
       required this.text,

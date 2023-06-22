@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/Screens/bottom_nav.dart';
+import 'package:frontend/Screens/register_with_phone.dart';
 import 'package:frontend/constant.dart';
 import 'firebase_options.dart';
 
@@ -11,6 +13,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  bool isUserLoggedInAlready = FirebaseAuth.instance.currentUser != null;
   runApp(ProviderScope(
     child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -28,6 +31,8 @@ Future<void> main() async {
             ),
           ),
         ),
-        home: const BottomNav()),
+        home: isUserLoggedInAlready
+            ? const BottomNav()
+            : const RegisterWithPhoneNumber()),
   ));
 }

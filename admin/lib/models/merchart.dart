@@ -7,8 +7,8 @@ final merchatStateProvider = StateProvider<Merchant>((ref) {
 
 class Merchant extends ChangeNotifier {
   String? name;
-  String? latitude;
-  String? longitude;
+  double? latitude;
+  double? longitude;
   String? placeId;
   String? notificationToken;
   String? photoUrl;

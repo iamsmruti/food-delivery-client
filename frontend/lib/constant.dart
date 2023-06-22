@@ -15,7 +15,7 @@ const titleStyle2 = TextStyle(
   fontSize: 16,
   color: Colors.black45,
 );
-const subtitleStyle = TextStyle(fontSize: 14, fontWeight: FontWeight.w500);
+const subtitleStyle =TextStyle(fontSize: 14, fontWeight: FontWeight.w500); 
 const infoStyle = TextStyle(fontSize: 12, color: Colors.black54);
 
 //Decoration

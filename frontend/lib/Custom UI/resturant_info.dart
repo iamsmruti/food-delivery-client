@@ -9,7 +9,8 @@ import '../Screens/cart_screen.dart';
 
 class RestaurantInfo extends ConsumerWidget {
   final Merchant merchant;
-  const RestaurantInfo({super.key, required this.merchant});
+  final String distance;
+  const RestaurantInfo({super.key, required this.merchant,required this.distance});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -65,9 +66,9 @@ class RestaurantInfo extends ConsumerWidget {
                         const SizedBox(
                           width: 10,
                         ),
-                        const Text(
-                          "2KM",
-                          style: TextStyle(
+                        Text(
+                          "$distance KM",
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: primaryColor,

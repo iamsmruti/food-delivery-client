@@ -30,4 +30,16 @@ class Address {
         .setItem('Address1', address)
         .onError((error, stackTrace) => false);
   }
+
+  static Map<String, dynamic> toMap(Address add) {
+    return {
+      'address': add.address,
+      'streetName': add.streetName,
+      'state': add.state,
+      'city': add.city,
+      'phoneNumber': add.phoneNumber,
+      'latitude': add.latitude,
+      'longitude': add.longitude
+    };
+  }
 }

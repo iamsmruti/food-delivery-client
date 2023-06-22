@@ -1,10 +1,15 @@
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/Models/address_model.dart';
 import 'package:frontend/Models/cart_model.dart';
+import 'package:frontend/Models/merchart.dart';
 import 'package:frontend/Screens/address_edit.dart';
 import 'package:frontend/constant.dart';
+import 'package:frontend/handlers/notification_handler.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
 import '../Custom UI/cart_item.dart';
@@ -19,72 +24,59 @@ class CartScreen extends ConsumerStatefulWidget {
 class _CartScreenState extends ConsumerState<CartScreen>
     with SingleTickerProviderStateMixin {
   var now = DateTime.now();
+  Address? address;
   double oldTotal = 0;
   int? timesOrderd;
   double total = 0;
   String? gender;
+  bool isPlacingOrder = false;
 
   ScrollController scrollController = ScrollController();
   AnimationController? animationController;
-  TextEditingController addressController = TextEditingController();
-  TextEditingController instructionsController = TextEditingController();
 
-  // onCheckOutClick(MyCart cart) async {
-  //   User user = FirebaseAuth.instance.currentUser!;
-  //   try {
-  //     final orderId = DateTime.now().millisecondsSinceEpoch;
-  //     final orderDate = DateTime.now();
-  //     List<Map> data = List.generate(cart.cartItems.length, (index) {
-  //       return {
-  //         "id": cart.cartItems[index].food.id,
-  //         "name": cart.cartItems[index].food.name,
-  //         "quantity": cart.cartItems[index].quantity,
-  //       };
-  //     }).toList();
-  //     FirebaseFirestore.instance
-  //         .collection("Orders")
-  //         .doc(orderId.toString())
-  //         .set({
-  //       "Ordered Items": data,
-  //       "Address": addressController.text,
-  //       "Order Status": "Order Placed",
-  //       "Total Price": int.parse(total.toString()),
-  //       "Final Price": int.parse(dicountedPrice.toString()),
-  //       "Order Id": orderId,
-  //       "Date": orderDate,
-  //       "UserId": user.uid,
-  //       "Phone Number": user.phoneNumber,
-  //       "Cooking Instructions": instructionsController.text
-  //     });
-  //     FirebaseFirestore.instance
-  //         .collection("Users")
-  //         .doc(user.uid)
-  //         .collection("Orders")
-  //         .doc(orderId.toString())
-  //         .set({
-  //       "Ordered Items": data,
-  //       "Address": addressController.text,
-  //       "Order Status": "Order Placed",
-  //       "Total Price": int.parse(total.toString()),
-  //       "Final Price": int.parse(dicountedPrice.toString()),
-  //       "Date": orderDate
-  //     });
-  //   } catch (ex) {
-  //     if (kDebugMode) {
-  //       print(ex.toString());
-  //     }
-  //   }
-  //   for (CartItem item in cart.cartItems) {
-  //     MixPanelAnalyticsManager.instance.sendEvent(
-  //       eventName: item.food.name,
-  //       properties: {
-  //         'api_endpoint': '/${item.food.category}/${item.food.name}',
-  //         'status': 200,
-  //         'Quantity': '${item.quantity}',
-  //       },
-  //     );
-  //   }
-  // }
+  onCheckOutClick(MyCart cart) async {
+    isPlacingOrder = true;
+    setState(() {});
+    User user = FirebaseAuth.instance.currentUser!;
+    try {
+      final orderId = DateTime.now().millisecondsSinceEpoch;
+      final orderDate = DateTime.now();
+      List<Map> data = List.generate(cart.cartItems.length, (index) {
+        return {
+          "id": cart.cartItems[index].food.id,
+          "name": cart.cartItems[index].food.name,
+          "quantity": cart.cartItems[index].quantity,
+        };
+      }).toList();
+      await FirebaseFirestore.instance
+          .collection("Orders")
+          .doc(orderId.toString())
+          .set({
+        "Ordered Items": data,
+        "Address": Address.toMap(address!),
+        "Order Status": "Order Placed",
+        "Total Price": total,
+        "Order Id": orderId,
+        "Date": orderDate,
+        "Customer Id": user.uid,
+        "Resturant Id": ref.read(merchatStateProvider).id,
+        "Phone Number": user.phoneNumber,
+      });
+      notificationApiCall("New Order", address!.address,
+          ref.read(merchatStateProvider).notificationToken!);
+      setState(() {
+        isPlacingOrder = false;
+      });
+      cart.clearCart();
+    } catch (ex) {
+      if (kDebugMode) {
+        print(ex.toString());
+      }
+      setState(() {
+        isPlacingOrder = false;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -141,7 +133,17 @@ class _CartScreenState extends ConsumerState<CartScreen>
           ),
           Align(
               alignment: Alignment.bottomCenter,
-              child: buildBottomSection(cart))
+              child: buildBottomSection(cart)),
+          Visibility(
+              visible: isPlacingOrder,
+              child: Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Container(
+                      color: Colors.grey.shade200.withOpacity(0.7),
+                      child: const Center(child: CircularProgressIndicator()))))
         ],
       ),
     );
@@ -224,9 +226,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
   }
 
   Widget buildAddress() {
-    print(Address.getAddress());
     bool isAddressAvilable = Address.getAddress() != null;
-    Address? address;
     if (isAddressAvilable) {
       address = Address.getAddress()!;
     }
@@ -241,7 +241,6 @@ class _CartScreenState extends ConsumerState<CartScreen>
           height: 20,
         ),
         SizedBox(
-          height: 120,
           width: double.infinity,
           child: Card(
               shape: roundedRectangle12,
@@ -262,19 +261,19 @@ class _CartScreenState extends ConsumerState<CartScreen>
                                 style: const TextStyle(fontSize: 16),
                               ),
                               Text(
-                                "Address : ${address.address}",
+                                "Address : ${address!.address}",
                                 style: const TextStyle(fontSize: 16),
                               ),
                               Text(
-                                "StreetName : ${address.streetName}",
+                                "StreetName : ${address!.streetName}",
                                 style: const TextStyle(fontSize: 16),
                               ),
                               Text(
-                                "City : ${address.city} ,${address.state}",
+                                "City : ${address!.city} ,${address!.state}",
                                 style: const TextStyle(fontSize: 16),
                               ),
                               Text(
-                                "Phone: ${address.phoneNumber}",
+                                "Phone: ${address!.phoneNumber}",
                                 style: const TextStyle(fontSize: 16),
                               ),
                             ],
@@ -284,12 +283,17 @@ class _CartScreenState extends ConsumerState<CartScreen>
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: ElevatedButton(
-                              onPressed: () {
-                                // Navigator.pop(context);
-                                PersistentNavBarNavigator.pushNewScreen(context,
-                                    screen: const AddressEdit(
-                                      isEdit: true,
-                                    ));
+                              onPressed: () async {
+                                bool data = await PersistentNavBarNavigator
+                                    .pushNewScreen(context,
+                                        screen: const AddressEdit(
+                                          isEdit: true,
+                                        ));
+                                if (data) {
+                                  setState(() {
+                                    address = Address.getAddress()!;
+                                  });
+                                }
                               },
                               child: const Text("Edit")),
                         ),
@@ -297,12 +301,18 @@ class _CartScreenState extends ConsumerState<CartScreen>
                     )
                   : Center(
                       child: ElevatedButton(
-                          onPressed: () {
-                            // Navigator.pop(context);
-                            PersistentNavBarNavigator.pushNewScreen(context,
-                                screen: const AddressEdit(
-                                  isEdit: false,
-                                ));
+                          onPressed: () async {
+                            bool data =
+                                await PersistentNavBarNavigator.pushNewScreen(
+                                    context,
+                                    screen: const AddressEdit(
+                                      isEdit: false,
+                                    ));
+                            if (data) {
+                              setState(() {
+                                address = Address.getAddress()!;
+                              });
+                            }
                           },
                           child: const Text("Add Address")),
                     )),
@@ -317,15 +327,9 @@ class _CartScreenState extends ConsumerState<CartScreen>
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
-          // if (cart.cartItems.isEmpty) {
-          //   Fluttertoast.showToast(
-          //       webPosition: "center", msg: "Your Cart Is Empty");
-          // } else if (dicountedPrice < 199) {
-          //   Fluttertoast.showToast(
-          //       webPosition: "center", msg: "Minimum Order Value 200Rs.");
-          // } else {
-          //   displayTextInputDialog(context, cart);
-          // }
+          if (cart.cartItems.isNotEmpty && address != null) {
+            onCheckOutClick(cart);
+          }
         },
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 12),
