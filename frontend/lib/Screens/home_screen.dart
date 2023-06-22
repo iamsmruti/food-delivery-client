@@ -75,11 +75,11 @@ class _MenuScreenState extends State<MenuScreen> {
           child: Card(
               shape: roundedRectangle12,
               color: secondaryColor,
-              child: const Padding(
+              child:  Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
+                  children: const [
                     Icon(Icons.search),
                     SizedBox(
                       width: 10,
