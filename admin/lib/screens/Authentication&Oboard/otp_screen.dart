@@ -1,5 +1,7 @@
 import 'package:admin/constants.dart';
-import 'package:admin/screens/new_outlet.dart';
+import 'package:admin/screens/Authentication&Oboard/new_outlet.dart';
+import 'package:admin/screens/outlet_mainpage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -97,8 +99,28 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                               smsCode: _verificationCode!);
                       await FirebaseAuth.instance
                           .signInWithCredential(credential)
-                          .then((value) {
+                          .then((value) async {
                         if (value.user != null) {
+                          // await FirebaseFirestore.instance
+                          //     .collection("Merchants")
+                          //     .doc(value.user?.uid)
+                          //     .get()
+                          //     .then((value) {
+                          //   if (value.exists) {
+                          //     Navigator.pushAndRemoveUntil(
+                          //         context,
+                          //         MaterialPageRoute(
+                          //             builder: (context) =>
+                          //                 const OutletMainPage()),
+                          //         (route) => false);
+                          //   } else {
+                          //     Navigator.pushAndRemoveUntil(
+                          //         context,
+                          //         MaterialPageRoute(
+                          //             builder: (context) => const NewOutlet()),
+                          //         (route) => false);
+                          //   }
+                          // });
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(

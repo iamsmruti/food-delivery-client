@@ -1,11 +1,10 @@
-
 import 'package:admin/constants.dart';
-import 'package:admin/handlers/google_maps.dart';
-import 'package:admin/models/place_search.dart';
+import 'package:admin/Models/place_search.dart';
 import 'package:admin/screens/outlet_mainpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -13,14 +12,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import 'dart:io';
-import 'map.dart';
+import '../map.dart';
 
 final venueDataProv =
-    ChangeNotifierProvider<VenueProvider>((ref) => VenueProvider(ref));
+    ChangeNotifierProvider<VenueProvider>((ref) => VenueProvider());
 
 class VenueProvider extends ChangeNotifier {
-  VenueProvider(this.ref);
-  final Ref ref;
   TextEditingController venueController = TextEditingController();
 
   String? latitude;
@@ -31,6 +28,12 @@ class VenueProvider extends ChangeNotifier {
     latitude = lat;
     longitude = long;
     notifyListeners();
+  }
+
+  clear() {
+    venueController = TextEditingController();
+    latitude = null;
+    longitude = null;
   }
 }
 
@@ -49,34 +52,37 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
   String? description;
   String? address;
   final _itemImageController = TextEditingController();
-  TextEditingController searchQueryController = TextEditingController();
   PlaceSearch? predictions;
   bool predictionWidget = false;
-  double? latitude;
-  double? longitude;
 
   submitData() async {
+    VenueProvider venueProvider = ref.read(venueDataProv);
     if (name == '') {
       Fluttertoast.showToast(msg: 'Name can\'t be empty');
     } else if (description == '') {
       Fluttertoast.showToast(msg: 'Description can\'t be empty');
     } else if (address == '') {
       Fluttertoast.showToast(msg: 'Address can\'t be empty');
-    } else if (searchQueryController.text == '') {
+    } else if (venueProvider.venueController.text.isEmpty) {
       Fluttertoast.showToast(msg: 'Location can\'t be empty');
     } else {
+      if (kDebugMode) {
+        print("Working");
+        return;
+      }
       FirebaseFirestore.instance
           .collection("Merchants")
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .set({
         "name": name,
         "description": description,
+        
         "address": address,
-        "lat": latitude,
+        "lat": venueProvider.latitude,
         "image": _itemImageController.text.isEmpty
             ? imageLink
             : _itemImageController.text,
-        "lng": longitude,
+        "lng": venueProvider.longitude,
         "notif_token": await FirebaseMessaging.instance.getToken()
       }).whenComplete(() {
         Fluttertoast.showToast(msg: "Outlet Created Successfully");
@@ -196,7 +202,6 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
                 },
                 child: TextField(
                   onChanged: (value) async {},
-                  // readOnly: true,
                   controller: ref.watch(venueDataProv).venueController,
                   style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
@@ -226,41 +231,6 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              predictionWidget
-                  ? Container(
-                      height: 200,
-                      color: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: ListView.builder(
-                          itemCount: predictions?.predictions.length,
-                          itemBuilder: (context, index) => InkWell(
-                                onTap: () async {
-                                  searchQueryController.text = predictions!
-                                      .predictions[index].description;
-                                  predictionWidget = false;
-                                  setState(() {});
-                                  dynamic coordinatesResult =
-                                      await GoogleMapsHandler()
-                                          .getCoordinatesFromPlaceID(
-                                              predictions!
-                                                  .predictions[index].placeId);
-                                  latitude = coordinatesResult['lat'];
-                                  longitude = coordinatesResult['lng'];
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 8),
-                                  child: Text(
-                                    predictions!.predictions[index].description,
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                ),
-                              )),
-                    )
-                  : const SizedBox.shrink(),
               const SizedBox(height: 20),
               TextField(
                 onChanged: (value) {},
@@ -334,7 +304,6 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
     firebase_storage.Reference ref =
         firebase_storage.FirebaseStorage.instance.ref().child(fileName);
     firebase_storage.UploadTask uploadTask = ref.putFile(File(imagePath));
-
 
     firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
     String downloadURL = await taskSnapshot.ref.getDownloadURL();

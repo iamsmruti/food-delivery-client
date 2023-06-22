@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import 'package:geolocator/geolocator.dart';
 
-import '../models/place_search.dart';
+import '../Models/place_search.dart';
 
 class GoogleMapsHandler {
   String API_KEY = 'AIzaSyDzZIfF8tcz2poemY8_6DCEd19t2FhtlV4';

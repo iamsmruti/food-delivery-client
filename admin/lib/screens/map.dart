@@ -6,11 +6,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoder2/geocoder2.dart';
 import '../handlers/google_maps.dart';
-import '../models/place_search.dart';
-import 'new_outlet.dart';
+import '../Models/place_search.dart';
+import 'Authentication&Oboard/new_outlet.dart';
 
 class Maps extends ConsumerStatefulWidget {
-  const Maps({Key? key}) : super(key: key);
+  final LatLng? loc;
+  const Maps({Key? key, this.loc}) : super(key: key);
 
   @override
   ConsumerState<Maps> createState() => _MapsState();
@@ -36,8 +37,12 @@ class _MapsState extends ConsumerState<Maps> {
   }
 
   getLiveLocation() async {
-    final Position position = await GoogleMapsHandler().determinePosition();
-    curLocation = LatLng(position.latitude, position.longitude);
+    if (widget.loc != null) {
+      curLocation = widget.loc;
+    } else {
+      final Position position = await GoogleMapsHandler().determinePosition();
+      curLocation = LatLng(position.latitude, position.longitude);
+    }
     setState(() {});
   }
 
@@ -66,7 +71,7 @@ class _MapsState extends ConsumerState<Maps> {
                           curLocation!.latitude.toString(),
                           curLocation!.longitude.toString());
                     }
-                    Navigator.pop(context);
+                    Navigator.pop(context,true);
                   },
                   child: const Text("Done",
                       style: TextStyle(

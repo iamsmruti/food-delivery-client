@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:admin/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -78,6 +79,7 @@ class _ItemAddState extends State<ItemAdd> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: primaryColor,
         title: widget.isEdit
             ? const Text(
                 "Update Item",
@@ -331,7 +333,7 @@ class _ItemAddState extends State<ItemAdd> {
                       child: TextField(
                         readOnly: true,
                         onTap: () {
-                          if (Platform.isIOS) return;
+                          // if (Platform.isIOS) return;
                           selectImage();
                         },
                         controller: _itemImageController,

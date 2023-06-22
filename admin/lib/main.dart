@@ -1,4 +1,4 @@
-import 'package:admin/screens/login_screen.dart';
+import 'package:admin/screens/Authentication&Oboard/login_screen.dart';
 import 'package:admin/screens/outlet_mainpage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';

@@ -1,36 +1,36 @@
-import 'package:admin/models/merchart.dart';
-import 'package:admin/screens/login_screen.dart';
+import 'package:admin/Models/merchart.dart';
+import 'package:admin/constants.dart';
+import 'package:admin/screens/Authentication&Oboard/login_screen.dart';
+import 'package:admin/screens/Authentication&Oboard/new_outlet.dart';
+import 'package:admin/screens/map.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
+  const ProfilePage({super.key});
+
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _descriptionController = TextEditingController();
-  TextEditingController _addressController = TextEditingController();
-  String _photoUrl = ''; // Variable to store the fetched photo URL
+class _ProfilePageState extends ConsumerState<ProfilePage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _addressController =
+      TextEditingController(); // Variable to store the fetched photo URL
   bool _hasChanges = false;
+  String? _photoUrl;
+  bool isLoading = true;
+  bool isSaving = false;
+  Merchant? shop;
 
   @override
   void initState() {
     super.initState();
     fetchMerchantData(); // Fetch merchant data when the page initializes
-    fetchMerchantPhotoUrl().then((url) {
-      setState(() {
-        _photoUrl = url;
-      });
-    });
-
-    // Set initial values for the text fields
-    _nameController.text = 'Restaurant Name';
-    _descriptionController.text = 'Description of the restaurant';
-    _addressController.text = 'Restaurant Address';
-
     // Add listeners to check for changes in the text fields
     _nameController.addListener(_textFieldListener);
     _descriptionController.addListener(_textFieldListener);
@@ -45,45 +45,30 @@ class _ProfilePageState extends State<ProfilePage> {
     super.dispose();
   }
 
-  Future<List<Merchant>> fetchMerchantData() async {
-    QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('Merchants').get();
-
-    List<Merchant> shops = snapshot.docs.map((DocumentSnapshot doc) {
-      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
-      return Merchant(
-        name: data['name'],
-        description: data['description'],
-        photoUrl: data['image'],
-        placeId: data['address'],
-      );
-    }).toList();
-
-    if (shops.isNotEmpty) {
-      // If there are merchant records, update the text fields with the first merchant's data
-      setState(() {
-        _nameController.text = shops[0].name!;
-        _descriptionController.text = shops[0].description!;
-        _addressController.text = shops[0].placeId!;
-      });
-    }
-
-    return shops;
-  }
-
-  Future<String> fetchMerchantPhotoUrl() async {
-    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+  fetchMerchantData() async {
+    DocumentSnapshot<Map<String, dynamic>> data = await FirebaseFirestore
+        .instance
         .collection('Merchants')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .doc(FirebaseAuth.instance.currentUser?.uid)
         .get();
 
-    if (snapshot.exists) {
-      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-      return data['photoUrl'];
-    }
-
-    return '';
+    shop = Merchant(
+        name: data['name'],
+        description: data['description'],
+        photoUrl: data['image'] ?? " ",
+        placeId: data['address'],
+        latitude: data['lat'],
+        longitude: data['lng']);
+    setState(() {
+      _nameController.text = shop!.name!;
+      _descriptionController.text = shop!.description!;
+      _addressController.text = shop!.placeId!;
+      _photoUrl = shop!.photoUrl == " "
+          ? "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80"
+          : shop!.photoUrl;
+      isLoading = false;
+    });
+    ref.read(venueDataProv).clear();
   }
 
   void _textFieldListener() {
@@ -94,28 +79,38 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _saveChanges() {
     // Save the changes to Firestore
+    setState(() {
+      isSaving = true;
+    });
     String name = _nameController.text;
     String description = _descriptionController.text;
     String address = _addressController.text;
 
     FirebaseFirestore.instance
         .collection('Merchants')
-        .doc(FirebaseAuth.instance.currentUser!.uid) // Replace with the document ID of your merchant data
+        .doc(FirebaseAuth.instance.currentUser!
+            .uid) // Replace with the document ID of your merchant data
         .update({
       'name': name,
       'description': description,
       'address': address,
+      'lat': double.parse(
+          ref.read(venueDataProv).latitude ?? shop!.latitude.toString()),
+      'lng': double.parse(
+          ref.read(venueDataProv).longitude ?? shop!.longitude.toString())
     }).then((value) {
       setState(() {
         _hasChanges = false;
+        isSaving = false;
         FocusScope.of(context).unfocus(); // Remove cursor
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Changes saved successfully.')),
+        const SnackBar(content: Text('Changes saved successfully.')),
       );
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save changes. Please try again.')),
+        const SnackBar(
+            content: Text('Failed to save changes. Please try again.')),
       );
     });
   }
@@ -124,149 +119,208 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: const Text('Profile'),
+        backgroundColor: primaryColor,
         actions: [
           if (_hasChanges)
             IconButton(
-              icon: Icon(Icons.save),
+              icon: const Icon(Icons.save),
               onPressed: _saveChanges,
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 200,
-              margin: const EdgeInsets.only(bottom: 3),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: const Color.fromARGB(255, 189, 217, 231),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: _photoUrl.isNotEmpty
-                    ? Image.network(
-                        _photoUrl,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      )
-                    : Image.asset(
-                        "assets/images/cafe.png",
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
-              ),
-            ),
-            SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Stack(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 15),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Add images functionality here
-                    },
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.teal,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Container(
+                          height: 200,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: const Color.fromARGB(255, 189, 217, 231),
+                          ),
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.network(
+                                _photoUrl!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              )),
+                        ),
                       ),
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Text(
-                        'Add Images',
-                        style: TextStyle(fontSize: 16),
+                      const SizedBox(height: 5),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 15),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Add images functionality here
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                child: Text(
+                                  'Update Image',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: TextFormField(
+                          controller: _nameController,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: 'Restaurant Name',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onChanged: (_) => _textFieldListener(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: TextFormField(
+                          controller: _descriptionController,
+                          style: const TextStyle(fontSize: 15),
+                          decoration: InputDecoration(
+                            labelText: 'Description',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onChanged: (_) => _textFieldListener(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: TextFormField(
+                          controller: _addressController,
+                          style: const TextStyle(fontSize: 16),
+                          decoration: InputDecoration(
+                            labelText: 'Address',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onChanged: (_) => _textFieldListener(),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Card(
+                          color: Colors.teal.withOpacity(0.9),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          child: ListTile(
+                            onTap: () async {
+                              final res = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Maps(
+                                            loc: LatLng(shop!.latitude!,
+                                                shop!.longitude!),
+                                          )));
+                              if (res != null) {
+                                shop!.latitude = double.parse(
+                                    ref.read(venueDataProv).latitude!);
+                                shop!.longitude = double.parse(
+                                    ref.read(venueDataProv).longitude!);
+                              }
+                              setState(() {});
+                            },
+                            title: Text(
+                              ref
+                                      .read(venueDataProv)
+                                      .venueController
+                                      .text
+                                      .isNotEmpty
+                                  ? ref.read(venueDataProv).venueController.text
+                                  : "Update Resturant Location",
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.white),
+                            ),
+                            trailing: const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 34,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            FirebaseAuth.instance.signOut().then((value) =>
+                                Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginScreen()),
+                                    (route) => false));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            child: Text(
+                              'Log Out',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                Visibility(
+                    visible: isSaving,
+                    child: Positioned(
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        child: Container(
+                            color: Colors.grey.shade200.withOpacity(0.7),
+                            child: const Center(
+                                child: CircularProgressIndicator()))))
               ],
             ),
-            const SizedBox(
-              height: 15,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: TextFormField(
-                controller: _nameController,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-                decoration: InputDecoration(
-                  labelText: 'Restaurant Name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onChanged: (_) => _textFieldListener(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextFormField(
-                controller: _descriptionController,
-                style: const TextStyle(fontSize: 15),
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onChanged: (_) => _textFieldListener(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextFormField(
-                controller: _addressController,
-                style: const TextStyle(fontSize: 16),
-                decoration: InputDecoration(
-                  labelText: 'Address',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onChanged: (_) => _textFieldListener(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  FirebaseAuth.instance.signOut().then((value) =>
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => LoginScreen()),
-                          (route) => false));
-                },
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text(
-                    'Log Out',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
