@@ -1,3 +1,4 @@
+
 import 'package:admin/constants.dart';
 import 'package:admin/handlers/google_maps.dart';
 import 'package:admin/models/place_search.dart';
@@ -8,8 +9,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
-
+import 'dart:io';
 import 'map.dart';
 
 final venueDataProv =
@@ -19,6 +22,7 @@ class VenueProvider extends ChangeNotifier {
   VenueProvider(this.ref);
   final Ref ref;
   TextEditingController venueController = TextEditingController();
+
   String? latitude;
   String? longitude;
 
@@ -39,10 +43,12 @@ class NewOutlet extends ConsumerStatefulWidget {
 
 class _NewOutletState extends ConsumerState<NewOutlet> {
   bool isLoading = false;
-
+  String imageLink =
+      "https://images.everydayhealth.com/images/diet-nutrition/34da4c4e-82c3-47d7-953d-121945eada1e00-giveitup-unhealthyfood.jpg?sfvrsn=a31d8d32_0";
   String? name;
   String? description;
-
+  String? address;
+  final _itemImageController = TextEditingController();
   TextEditingController searchQueryController = TextEditingController();
   PlaceSearch? predictions;
   bool predictionWidget = false;
@@ -54,6 +60,8 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
       Fluttertoast.showToast(msg: 'Name can\'t be empty');
     } else if (description == '') {
       Fluttertoast.showToast(msg: 'Description can\'t be empty');
+    } else if (address == '') {
+      Fluttertoast.showToast(msg: 'Address can\'t be empty');
     } else if (searchQueryController.text == '') {
       Fluttertoast.showToast(msg: 'Location can\'t be empty');
     } else {
@@ -63,7 +71,11 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
           .set({
         "name": name,
         "description": description,
+        "address": address,
         "lat": latitude,
+        "image": _itemImageController.text.isEmpty
+            ? imageLink
+            : _itemImageController.text,
         "lng": longitude,
         "notif_token": await FirebaseMessaging.instance.getToken()
       }).whenComplete(() {
@@ -107,7 +119,7 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 40),
               TextField(
                 onChanged: (value) {
                   name = value;
@@ -130,7 +142,7 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
               TextField(
                 onChanged: (value) {
                   description = value;
@@ -153,7 +165,30 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
+              TextField(
+                onChanged: (value) {
+                  address = value;
+                },
+                maxLines: 3,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: 'Enter Address Manually',
+                  hintStyle:
+                      TextStyle(color: Color.fromARGB(255, 182, 182, 182)),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color.fromARGB(255, 182, 182, 182)),
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color.fromARGB(255, 182, 182, 182)),
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
               InkWell(
                 onTap: () {
                   PersistentNavBarNavigator.pushNewScreen(context,
@@ -165,7 +200,7 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
                   controller: ref.watch(venueDataProv).venueController,
                   style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
-                    hintText: 'Location',
+                    hintText: 'Select Address From Map',
                     enabled: false,
                     hintStyle:
                         TextStyle(color: Color.fromARGB(255, 182, 182, 182)),
@@ -226,7 +261,33 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
                               )),
                     )
                   : const SizedBox.shrink(),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
+              TextField(
+                onChanged: (value) {},
+                readOnly: true,
+                onTap: () {
+                  selectImage();
+                },
+                controller: _itemImageController,
+                maxLines: 3,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: 'Upload Your Outlet Image',
+                  hintStyle:
+                      TextStyle(color: Color.fromARGB(255, 182, 182, 182)),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color.fromARGB(255, 182, 182, 182)),
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color.fromARGB(255, 182, 182, 182)),
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
               MaterialButton(
                 minWidth: double.infinity,
                 color: secondaryColor,
@@ -257,5 +318,26 @@ class _NewOutletState extends ConsumerState<NewOutlet> {
         ),
       ),
     );
+  }
+
+  void selectImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      String imageLink = await uploadImageToFirestore(image.path);
+      _itemImageController.text = imageLink;
+    }
+  }
+
+  Future<String> uploadImageToFirestore(String imagePath) async {
+    String fileName = imagePath.split('/').last;
+    firebase_storage.Reference ref =
+        firebase_storage.FirebaseStorage.instance.ref().child(fileName);
+    firebase_storage.UploadTask uploadTask = ref.putFile(File(imagePath));
+
+
+    firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadURL = await taskSnapshot.ref.getDownloadURL();
+    return downloadURL;
   }
 }

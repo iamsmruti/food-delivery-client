@@ -1,9 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:admin/screens/add_item_page.dart';
-import 'package:admin/screens/login_screen.dart';
 import 'package:admin/screens/new_outlet.dart';
 import 'package:admin/screens/menu_screen.dart';
+import 'package:admin/screens/profile_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -53,17 +53,18 @@ class _OutletMainPageState extends State<OutletMainPage> {
     return [
       Menu(),
       ItemAdd(isEdit: false),
-      Center(
-          child: ElevatedButton(
-        onPressed: () {
-          FirebaseAuth.instance.signOut().then((value) =>
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                  (route) => false));
-        },
-        child: Text("Logout"),
-      )),
+      // Center(
+      //     child: ElevatedButton(
+      //   onPressed: () {
+      //     FirebaseAuth.instance.signOut().then((value) =>
+      //         Navigator.pushAndRemoveUntil(
+      //             context,
+      //             MaterialPageRoute(builder: (context) => LoginScreen()),
+      //             (route) => false));
+      //   },
+      //   child: Text("Logout"),
+      // )),
+      ProfilePage(),
     ];
   }
 
