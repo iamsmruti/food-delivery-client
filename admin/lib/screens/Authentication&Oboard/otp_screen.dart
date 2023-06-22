@@ -101,31 +101,32 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           .signInWithCredential(credential)
                           .then((value) async {
                         if (value.user != null) {
-                          // await FirebaseFirestore.instance
-                          //     .collection("Merchants")
-                          //     .doc(value.user?.uid)
-                          //     .get()
-                          //     .then((value) {
-                          //   if (value.exists) {
-                          //     Navigator.pushAndRemoveUntil(
-                          //         context,
-                          //         MaterialPageRoute(
-                          //             builder: (context) =>
-                          //                 const OutletMainPage()),
-                          //         (route) => false);
-                          //   } else {
-                          //     Navigator.pushAndRemoveUntil(
-                          //         context,
-                          //         MaterialPageRoute(
-                          //             builder: (context) => const NewOutlet()),
-                          //         (route) => false);
-                          //   }
-                          // });
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const NewOutlet()),
-                              (route) => false);
+                          await FirebaseFirestore.instance
+                              .collection("Merchants")
+                              .doc(value.user?.uid)
+                              .get()
+                              .then((value) {
+                            if (value.exists) {
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const OutletMainPage()),
+                                  (route) => false);
+                            } else {
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const NewOutlet()),
+                                  (route) => false);
+                            }
+                          });
+                          
+                          // Navigator.pushAndRemoveUntil(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => const NewOutlet()),
+                          //     (route) => false);
                         }
                       });
                     } on FirebaseAuthException catch (e) {
