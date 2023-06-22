@@ -1,5 +1,6 @@
 import 'package:admin/screens/Menu/add_item_page.dart';
 import 'package:admin/screens/Menu/menu_screen.dart';
+import 'package:admin/screens/orders.dart';
 import 'package:admin/screens/profile_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class _OutletMainPageState extends State<OutletMainPage> {
     const Menu(),
     const ItemAdd(isEdit: false),
     const Center(child: Text("Next page")),
+    const Center(child: Text("Next page")),
   ];
 
   @override
@@ -31,6 +33,7 @@ class _OutletMainPageState extends State<OutletMainPage> {
     return [
       const Menu(),
       const ItemAdd(isEdit: false),
+      Orders(),
       const ProfilePage(),
     ];
   }
@@ -46,6 +49,12 @@ class _OutletMainPageState extends State<OutletMainPage> {
       PersistentBottomNavBarItem(
         icon: const Icon(CupertinoIcons.plus_circle),
         title: ("Add Items"),
+        activeColorPrimary: const Color.fromARGB(255, 75, 78, 237),
+        inactiveColorPrimary: CupertinoColors.systemGrey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(CupertinoIcons.cart),
+        title: ("Orders"),
         activeColorPrimary: const Color.fromARGB(255, 75, 78, 237),
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),

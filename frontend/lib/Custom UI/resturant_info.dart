@@ -133,7 +133,7 @@ class RestaurantInfo extends ConsumerWidget {
               children: [
                 Text((merchant.description)!,
                     style: const TextStyle(fontSize: 16)),
-                const Row(
+                 Row(
                   children: [
                     Icon(Icons.star_outline, color: primaryColor),
                     SizedBox(
