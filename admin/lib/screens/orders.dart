@@ -1,3 +1,4 @@
+import 'package:admin/screens/popscreen.dart';
 import 'package:admin/smallfont.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -126,7 +127,7 @@ class _OrdersState extends State<Orders> {
 }
 
 class PendingScreen extends StatelessWidget {
-  const PendingScreen({super.key});
+  const PendingScreen({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -135,199 +136,455 @@ class PendingScreen extends StatelessWidget {
       padding: const EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 0.0),
       width: double.maxFinite,
       child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: FirebaseFirestore.instance.collection("Orders").snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
+        stream: FirebaseFirestore.instance.collection("Orders").snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final orderList = snapshot.data?.docs;
+            if (orderList != null && orderList.isNotEmpty){
               return ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  padding: EdgeInsets.zero,
-                  itemCount: snapshot.data?.docs.length,
-                  itemBuilder: (context, index) {
-                    if (snapshot.data?.docs[index]['Resturant Id'] ==
-                        FirebaseAuth.instance.currentUser?.uid) {
-                      return Stack(
-                        children: [
-                          GestureDetector(
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              height: 180,
-                              margin: const EdgeInsets.only(bottom: 20),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.teal.withOpacity(0.3),
-                                    spreadRadius: 2,
-                                    blurRadius: 5,
-                                    offset: const Offset(0,
-                                        3), // changes the shadow direction vertically
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              itemCount: snapshot.data?.docs.length,
+              itemBuilder: (context, index) {
+                if (snapshot.data?.docs[index]['Resturant Id'] ==
+                    FirebaseAuth.instance.currentUser?.uid) {
+                  String orderId = snapshot.data!.docs[index].id;
+                  String orderStatus =
+                      snapshot.data!.docs[index]['Order Status'];
+
+                  if (orderStatus == 'Order Completed') {
+                    return SizedBox.shrink();
+                  }
+
+                  return Stack(
+                    children: [
+                      GestureDetector(
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          height: 180,
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.teal.withOpacity(0.3),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(
+                                  0,
+                                  3,
+                                ), // changes the shadow direction vertically
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              const SizedBox(
+                                height: 15 * 3.5,
+                              ),
+                              Row(
+                                children: [
+                                  const CircleAvatar(
+                                    radius: 25,
+                                    backgroundColor: Colors.grey,
+                                    child: Icon(Icons.food_bank),
                                   ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SmallFont(
+                                        text: snapshot.data?.docs[index]
+                                            ['Address']['name'],
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      const SizedBox(
+                                        height: 10 / 3,
+                                      ),
+                                      SmallFont(
+                                        text: snapshot.data?.docs[index]
+                                                ['Address']['address'] +
+                                            " , " +
+                                            snapshot.data?.docs[index]
+                                                ['Address']['streetName'] +
+                                            " , " +
+                                            snapshot.data?.docs[index]
+                                                ['Address']['city'],
+                                        fontWeight: FontWeight.w600,
+                                        size: 12,
+                                      ),
+                                    ],
+                                  )
                                 ],
                               ),
-                              child: Column(
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const SizedBox(
-                                    height: 15 * 3.5,
-                                  ),
-                                  Row(
-                                    children: [
-                                      const CircleAvatar(
-                                          radius: 25,
-                                          backgroundColor: Colors.grey,
-                                          child: Icon(Icons.food_bank)),
-                                      const SizedBox(
-                                        width: 10,
+                                  Container(
+                                    height: 25 + 10 / 1.3,
+                                    width: 40 * 4.7,
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(
+                                        255,
+                                        91,
+                                        169,
+                                        161,
+                                      ).withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Center(
+                                      child: SmallFont(
+                                        text:
+                                            "Total No of Items ${snapshot.data?.docs[index]['Ordered Items'].length}",
+                                        size: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.teal,
                                       ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          SmallFont(
-                                            text: snapshot.data?.docs[index]
-                                                ['Address']['name'],
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                          const SizedBox(
-                                            height: 10 / 3,
-                                          ),
-                                          SmallFont(
-                                            text: "C/99,Sector-7,Rourkela",
-                                            fontWeight: FontWeight.w600,
-                                            size: 12,
-                                          ),
-                                        ],
-                                      )
-                                    ],
+                                    ),
                                   ),
-                                  const SizedBox(
-                                    height: 15,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        height: 25 + 10 / 1.3,
-                                        width: 40 * 4.7,
-                                        decoration: BoxDecoration(
-                                            color: const Color.fromARGB(
-                                                    255, 91, 169, 161)
-                                                .withOpacity(0.3),
-                                            borderRadius:
-                                                BorderRadius.circular(15)),
-                                        child: Center(
-                                            child: SmallFont(
-                                          text:
-                                              "Total No of Items ${snapshot.data?.docs[index]['Ordered Items'].length}",
-                                          size: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.teal,
-                                        )),
+                                  GestureDetector(
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (_) => MyPopupScreen(
+                                          orderId: orderId,
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      height: 25 + 10 / 1.3,
+                                      width: 15 * 4.7,
+                                      decoration: BoxDecoration(
+                                        color: const Color.fromARGB(
+                                          255,
+                                          104,
+                                          212,
+                                          122,
+                                        ).withOpacity(0.3),
+                                        borderRadius: BorderRadius.circular(15),
                                       ),
-                                      Container(
-                                        height: 25 + 10 / 1.3,
-                                        width: 15 * 4.7,
-                                        decoration: BoxDecoration(
-                                            color: const Color.fromARGB(
-                                                    255, 104, 212, 122)
-                                                .withOpacity(0.3),
-                                            borderRadius:
-                                                BorderRadius.circular(15)),
-                                        child: Center(
-                                            child: SmallFont(
+                                      child: Center(
+                                        child: SmallFont(
                                           text: "Accept",
                                           size: 12,
                                           fontWeight: FontWeight.w600,
                                           color: Colors.green,
-                                        )),
-                                      )
-                                    ],
+                                        ),
+                                      ),
+                                    ),
                                   )
                                 ],
                               ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.only(
+                            left: 15,
+                            top: 10 / 1.5,
+                          ),
+                          decoration: const BoxDecoration(
+                            color: Color.fromARGB(255, 132, 203, 203),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(15),
+                              topRight: Radius.circular(15),
                             ),
                           ),
-                          Positioned(
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                              padding: const EdgeInsets.only(
-                                  left: 15, top: 10 / 1.5),
-                              decoration: const BoxDecoration(
-                                  color: Color.fromARGB(255, 132, 203, 203),
-                                  borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15))),
-                              height: 20 * 2.5,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                          height: 20 * 2.5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              SmallFont(
+                                text: snapshot.data?.docs[index]['Order Status'],
+                                color: Colors.teal[900],
+                                fontWeight: FontWeight.w600,
+                                size: 10 + 10 / 5,
+                              ),
+                              const SizedBox(
+                                height: 10 / 2,
+                              ),
+                              Row(
                                 children: [
+                                  const Icon(
+                                    Icons.timelapse,
+                                    size: 15,
+                                    color: Colors.black,
+                                  ),
+                                  const SizedBox(width: 10),
                                   SmallFont(
-                                    text: snapshot.data?.docs[index]
-                                        ['Order Status'],
-                                    color: Colors.teal[900],
+                                    text: DateFormat(
+                                      'ddth MMMM yyyy   hh:mm aa',
+                                    ).format(
+                                      DateTime.fromMillisecondsSinceEpoch(
+                                        snapshot.data?.docs[index]['Order Id'],
+                                      ),
+                                    ),
+                                    color: Colors.black,
                                     fontWeight: FontWeight.w600,
-                                    size: 10 + 10 / 5,
+                                    size: 10,
                                   ),
-                                  const SizedBox(
-                                    height: 10 / 2,
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.timelapse,
-                                        size: 15,
-                                        color: Colors.black,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      SmallFont(
-                                        text: DateFormat(
-                                                'ddth MMMM yyyy   hh:mm aa')
-                                            .format((DateTime
-                                                .fromMillisecondsSinceEpoch(
-                                                    snapshot.data?.docs[index]
-                                                        ["Order Id"]))),
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w600,
-                                        size: 10,
-                                      ),
-                                    ],
-                                  )
                                 ],
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      );
-                    } else {
-                      return const SizedBox.shrink();
-                    }
-                  });
-            } else {
-              return const Center(
-                child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              },
+            );
+            }else{
+              return Center(
+                child: Text(
+                  'No pending orders',
+                  style: TextStyle(fontSize: 20),
+                ),
               );
             }
-          }),
+            
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      ),
     );
   }
 }
 
 class CompletedScreen extends StatelessWidget {
-  const CompletedScreen({super.key});
+  const CompletedScreen({Key? key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.teal,
-      child: const Center(
-        child: Text(
-          'Completed',
-          style: TextStyle(fontSize: 24, color: Colors.black),
-        ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 0.0),
+      width: double.maxFinite,
+      child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance.collection("Orders").snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final orderList = snapshot.data?.docs;
+            if (orderList != null && orderList.isNotEmpty){
+              return ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              itemCount: snapshot.data?.docs.length,
+              itemBuilder: (context, index) {
+                if (snapshot.data?.docs[index]['Resturant Id'] ==
+                    FirebaseAuth.instance.currentUser?.uid) {
+                  String orderStatus =
+                      snapshot.data!.docs[index]['Order Status'];
+
+                  if (orderStatus != 'Order Completed') {
+                    return SizedBox.shrink();
+                  }
+
+                  return Stack(
+                    children: [
+                      GestureDetector(
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          height: 180,
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.teal.withOpacity(0.3),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              const SizedBox(
+                                height: 15 * 3.5,
+                              ),
+                              Row(
+                                children: [
+                                  const CircleAvatar(
+                                    radius: 25,
+                                    backgroundColor: Colors.grey,
+                                    child: Icon(Icons.food_bank),
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SmallFont(
+                                        text: snapshot.data?.docs[index]
+                                            ['Address']['name'],
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      const SizedBox(
+                                        height: 10 / 3,
+                                      ),
+                                      SmallFont(
+                                        text: snapshot.data?.docs[index]
+                                                ['Address']['address'] +
+                                            " , " +
+                                            snapshot.data?.docs[index]
+                                                ['Address']['streetName'] +
+                                            " , " +
+                                            snapshot.data?.docs[index]
+                                                ['Address']['city'],
+                                        fontWeight: FontWeight.w600,
+                                        size: 12,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    height: 25 + 10 / 1.3,
+                                    width: 40 * 4.7,
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(255, 91, 169, 161)
+                                          .withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Center(
+                                      child: SmallFont(
+                                        text:
+                                            "Total No of Items ${snapshot.data?.docs[index]['Ordered Items'].length}",
+                                        size: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.teal,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 25 + 10 / 1.3,
+                                    width: 15 * 4.7,
+                                    decoration: BoxDecoration(
+                                      color: Color.fromARGB(255, 27, 7, 80)
+                                          .withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Center(
+                                      child: SmallFont(
+                                        text: "Completed",
+                                        size: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.only(
+                            left: 15,
+                            top: 10 / 1.5,
+                          ),
+                          decoration: const BoxDecoration(
+                            color: Color.fromARGB(255, 132, 203, 203),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(15),
+                              topRight: Radius.circular(15),
+                            ),
+                          ),
+                          height: 20 * 2.5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              SmallFont(
+                                text: snapshot.data?.docs[index]['Order Status'],
+                                color: Colors.teal[900],
+                                fontWeight: FontWeight.w600,
+                                size: 10 + 10 / 5,
+                              ),
+                              const SizedBox(
+                                height: 10 / 2,
+                              ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.timelapse,
+                                    size: 15,
+                                    color: Colors.black,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  SmallFont(
+                                    text: DateFormat('ddth MMMM yyyy   hh:mm aa').format(
+                                      DateTime.fromMillisecondsSinceEpoch(
+                                        snapshot.data?.docs[index]['Order Id'],
+                                      ),
+                                    ),
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                    size: 10,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              },
+            );
+            }else{
+              return const Center(
+                child: Text(
+                  'No completed orders',
+                  style: TextStyle(fontSize: 18),
+                ),
+              );
+            }
+            
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
       ),
     );
   }
