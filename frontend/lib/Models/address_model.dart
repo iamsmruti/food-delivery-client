@@ -32,15 +32,16 @@ class Address {
   }
 
   static Map<String, dynamic> toMap(Address add) {
-    return {
-      'name': add.name,
-      'address': add.address,
-      'streetName': add.streetName,
-      'state': add.state,
-      'city': add.city,
-      'phoneNumber': add.phoneNumber,
-      'latitude': add.latitude,
-      'longitude': add.longitude
-    };
-  }
+  return {
+    'name': add.name,
+    'address': add.address,
+    'streetName': add.streetName,
+    'state': add.state,
+    'city': add.city,
+    'phoneNumber': add.phoneNumber,
+    'latitude': add.latitude,
+    'longitude': add.longitude
+  };
+}
+
 }

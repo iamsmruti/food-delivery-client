@@ -53,7 +53,16 @@ class _CartScreenState extends ConsumerState<CartScreen>
           .doc(orderId.toString())
           .set({
         "Ordered Items": data,
-        "Address": Address.toMap(address!),
+        "Address": {
+            "name": address!.name,
+            "address": address!.address,
+            "streetName": address!.streetName,
+            "state": address!.state,
+            "city": address!.city,
+            "phoneNumber": address!.phoneNumber,
+            "latitude": address!.latitude,
+            "longitude": address!.longitude,
+          },
         "Order Status": "Order Placed",
         "Total Price": total,
         "Order Id": orderId,
